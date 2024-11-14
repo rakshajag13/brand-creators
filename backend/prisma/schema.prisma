@@ -1,15 +1,288 @@
-// prisma/schema.prisma
+// This is your Prisma schema file
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // or any other database provider
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+// User Management
 model User {
-  id    Int     @id @default(autoincrement())
-  name  String
-  email String  @unique
+  id                Int           @id @default(autoincrement())
+  email             String        @unique
+  password          String
+  firstName         String
+  lastName          String
+  phone             String?
+  status            UserStatus    @default(ACTIVE)
+  role              UserRole      @default(CREATOR)
+  avatar            String?
+  bio               String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  client            Client?       @relation("ClientUsers", fields: [clientId], references: [id])
+  clientId          Int?
+  creator           Creator?
+  sentMessages      Message[]     @relation("MessageSender")
+  receivedMessages  Message[]     @relation("MessageReceiver")
+  chatRooms         ChatRoom[]
+  invitedBy         Invitation?   @relation("InvitedBy")
+  invitations       Invitation[]  @relation("Invitations")
+  transactions      Transaction[]
+  sessions          Session[]
+
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
+  CREATOR
+}
+
+// Client Management
+model Client {
+  id              Int       @id @default(autoincrement())
+  companyName     String
+  industry        String
+  website         String?
+  businessType    String
+  employeeCount   Int?
+  status          String    @default("active")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  users           User[]    @relation("ClientUsers")
+  products        Product[]
+  billingDetails  BillingDetail[]
+  creators        Creator[]
+
+  @@map("clients")
+}
+
+model BillingDetail {
+  id            Int       @id @default(autoincrement())
+  clientId      Int
+  address       String
+  city          String
+  state         String
+  zipCode       String
+  country       String
+  taxId         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  client        Client    @relation(fields: [clientId], references: [id])
+
+  @@map("billing_details")
+}
+
+// Creator Management
+model Creator {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique
+  expertise       String[]
+  portfolio       String?
+  socialLinks     Json?
+  availability    String?
+  rating          Float?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id])
+  clients         Client[]
+  payouts         Payout[]
+
+  @@map("creators")
+}
+
+// Product Management
+model Product {
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String
+  sku             String    @unique
+  price           Decimal   @db.Decimal(10, 2)
+  stockQuantity   Int       @default(0)
+  categoryId      Int
+  clientId        Int
+  status          String    @default("active")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  category        Category  @relation(fields: [categoryId], references: [id])
+  client          Client    @relation(fields: [clientId], references: [id])
+  images          ProductImage[]
+
+  @@map("products")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  products    Product[]
+
+  @@map("categories")
+}
+
+model ProductImage {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  imageUrl    String
+  isPrimary   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  product     Product   @relation(fields: [productId], references: [id])
+
+  @@map("product_images")
+}
+
+// Bulk Upload Management
+model BulkUploadLog {
+  id                Int       @id @default(autoincrement())
+  batchId          String    @unique
+  status           String
+  totalRecords     Int
+  processedRecords Int       @default(0)
+  failedRecords    Int       @default(0)
+  errorLog         Json?
+  createdAt        DateTime  @default(now())
+  completedAt      DateTime?
+
+  @@map("bulk_upload_logs")
+}
+
+// Invitation System
+model Invitation {
+  id          Int       @id @default(autoincrement())
+  email       String
+  token       String    @unique
+  role        UserRole
+  status      String
+  invitedById Int @unique
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  invitedBy   User      @relation("InvitedBy", fields: [invitedById], references: [id])
+  user        User?     @relation("Invitations", fields: [userid], references: [id])
+  userid Int?
+
+  @@map("invitations")
+}
+
+// Chat System
+model ChatRoom {
+  id          Int       @id @default(autoincrement())
+  name        String?
+  type        String
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  users       User[]
+  messages    Message[]
+
+  @@map("chat_rooms")
+}
+
+model Message {
+  id          Int       @id @default(autoincrement())
+  content     String
+  type        String    @default("text")
+  roomId      Int
+  senderId    Int
+  receiverId  Int
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  room        ChatRoom  @relation(fields: [roomId], references: [id])
+  sender      User      @relation("MessageSender", fields: [senderId], references: [id])
+  receiver    User      @relation("MessageReceiver", fields: [receiverId], references: [id])
+
+  @@map("messages")
+}
+
+// Payment System
+model Transaction {
+  id                  Int       @id @default(autoincrement())
+  userId              Int
+  amount              Decimal   @db.Decimal(10, 2)
+  type                String
+  status              String
+  paymentMethod       String?
+  stripeTransactionId String?
+  createdAt           DateTime  @default(now())
+
+  // Relations
+  user                User      @relation(fields: [userId], references: [id])
+
+  @@map("transactions")
+}
+
+model Payout {
+  id          Int       @id @default(autoincrement())
+  creatorId   Int
+  amount      Decimal   @db.Decimal(10, 2)
+  status      String
+  payoutDate  DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  creator     Creator   @relation(fields: [creatorId], references: [id])
+
+  @@map("payouts")
+}
+
+// Session Management
+model Session {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  token       String    @unique
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+// Report Settings
+model ReportSettings {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  type        String
+  frequency   String
+  lastRun     DateTime?
+  config      Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("report_settings")
 }
