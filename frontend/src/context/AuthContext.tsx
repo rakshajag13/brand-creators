@@ -5,7 +5,7 @@ import { User, LoginData, RegisterData, AuthResponse } from "../types/auth";
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (data: LoginData) => Promise<void>;
+    login: (data: LoginData) => Promise<{ data: User | null, error: string | null }>;
     register: (data: RegisterData) => Promise<void>;
     logout: () => void;
 }
@@ -37,13 +37,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
 
             if (!res.ok) {
-                throw new Error("Failed to login");
+                return {
+                    error: "Invalid Credentials",
+                    data: null
+                }
             }
             const auth: AuthResponse = await res.json();
             localStorage.setItem("token", auth.token as string);
             setUser(auth.user);
+            return { data: auth.user, error: null };
         } catch (error) {
-            throw error;
+            return { error: "Invalid Credentials", data: null }
         }
     };
     const register = async (data: RegisterData) => {

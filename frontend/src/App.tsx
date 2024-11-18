@@ -4,8 +4,9 @@ import './App.css';
 import { Register } from 'components/Register';
 import { AuthProvider } from 'context/AuthContext';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Home from 'components/Home';
+
 import { Login } from 'components/Login';
+import { Home } from 'components/Home';
 
 function App() {
   return (

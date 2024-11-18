@@ -1,11 +1,12 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, TextField, Typography, Grid, Container, Box } from "@mui/material";
+import { Button, TextField, Typography, Container, Box, Grid2 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { LoginData, RegisterData } from "../types/auth";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
 
 const Root = styled(Container)({
     display: 'flex',
@@ -39,10 +40,16 @@ export const Login: React.FC = () => {
         defaultValues: { email: "", password: "" }
     });
     const { login: loginUser } = useAuth();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const navigate = useNavigate();
     const onSubmit = async (data: LoginData) => {
         console.log(data)
-        await loginUser(data);
+        const { error: loginError, data: user } = await loginUser(data);
+        if (loginError && !user) {
+
+            setErrorMessage(loginError);
+            return;
+        }
         navigate('/Home');
     };
 
@@ -50,7 +57,7 @@ export const Login: React.FC = () => {
         <Root>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormContainer>
-                    <Typography variant="h5" textAlign="center" gutterBottom>
+                    <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
                         Login
                     </Typography>
 
@@ -84,16 +91,36 @@ export const Login: React.FC = () => {
                             />
                         )}
                     />
+                    {errorMessage && (
+                        <Typography variant="body1" color="error" gutterBottom>
+                            {errorMessage}
+                        </Typography>
+                    )}
 
                     <Button
                         type="submit"
                         variant="contained"
                         color="primary"
                         fullWidth
-                        sx={{ marginTop: '1rem' }}
                     >
-                        Submit
+                        Login
                     </Button>
+                    <Grid2 container justifyContent="center" display={"flex"} alignItems={"center"}>
+                        <Link to="/forgotPassword" style={{ "textDecoration": "none", "color": "#007BFF" }}>
+                            Forgot Password ?
+                        </Link>
+                    </Grid2>
+
+                    <Grid2 container justifyContent="center" display={"flex"} alignItems={"center"}>
+                        <Typography variant="subtitle1">
+                            Don't have an account?
+                        </Typography>
+                        <Grid2 sx={{ marginLeft: '0.5rem' }}>
+                            <Link to="/register" style={{ "textDecoration": "none", "color": "#007BFF" }}>
+                                Signup
+                            </Link>
+                        </Grid2>
+                    </Grid2>
                 </FormContainer>
             </form>
         </Root>

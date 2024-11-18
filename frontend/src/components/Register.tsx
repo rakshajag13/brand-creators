@@ -1,11 +1,11 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, TextField, Typography, Grid, Container, Box } from "@mui/material";
+import { Button, TextField, Typography, Grid, Container, Box, Grid2 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { RegisterData } from "../types/auth";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Root = styled(Container)({
     display: 'flex',
@@ -54,8 +54,8 @@ export const Register: React.FC = () => {
         <Root>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <FormContainer>
-                    <Typography variant="h5" textAlign="center" gutterBottom>
-                        Register
+                    <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
+                        Signup
                     </Typography>
 
                     <Controller
@@ -137,10 +137,20 @@ export const Register: React.FC = () => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        sx={{ marginTop: '1rem' }}
+                        sx={{ marginTop: '0.5rem' }}
                     >
-                        Submit
+                        Signup
                     </Button>
+                    <Grid2 container justifyContent="center" display={"flex"} alignItems={"center"}>
+                        <Typography variant="subtitle1">
+                            Already have an account?
+                        </Typography>
+                        <Grid2 sx={{ marginLeft: '0.5rem' }}>
+                            <Link to="/login" style={{ "textDecoration": "none", "color": "#007BFF" }}>
+                                Login
+                            </Link>
+                        </Grid2>
+                    </Grid2>
                 </FormContainer>
             </form>
         </Root>
