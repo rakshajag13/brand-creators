@@ -8,26 +8,28 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import { useNavigate } from 'react-router-dom';
+
+
 interface TempDrawerProps {
     open: boolean;
     toggleDrawer: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void
 }
 
 export default function TemporaryDrawer({ open, toggleDrawer }: TempDrawerProps) {
-
-
-
+    const navigate = useNavigate();
+    const handleMenuClick = (path: string) => {
+        console.log(path)
+        navigate(path, { replace: true });
+        toggleDrawer(false)
+    }
     const DrawerList = (
         <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
             <List>
-                {['Contacts'].map((text, index) => (
+                {['Contacts', 'Payments'].map((text, index) => (
                     <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                            </ListItemIcon>
+                        <ListItemButton onClick={() => handleMenuClick(`/${text.toLowerCase()}`)}>
+                            {/* <ListItemIcon>{icons[text as keyof typeof icons]}</ListItemIcon> */}
                             <ListItemText primary={text} />
                         </ListItemButton>
                     </ListItem>
@@ -43,4 +45,7 @@ export default function TemporaryDrawer({ open, toggleDrawer }: TempDrawerProps)
             </Drawer>
         </div>
     );
+
+
 }
+

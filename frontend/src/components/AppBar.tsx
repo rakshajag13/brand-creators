@@ -244,10 +244,12 @@ export default function PrimarySearchAppBar() {
                         </Box>
                     </Toolbar>
                 </AppBar>
+
                 {renderMobileMenu}
                 {renderMenu}
             </Box>
             <AppDrawer open={open} toggleDrawer={toggleDrawer} />
+
         </div>
 
     );

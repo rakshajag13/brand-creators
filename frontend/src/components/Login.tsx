@@ -3,10 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, TextField, Typography, Container, Box, Grid2 } from "@mui/material";
 import { styled } from '@mui/material/styles';
-import { LoginData, RegisterData } from "../types/auth";
+import { LoginData } from "../types/auth";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Root = styled(Container)({
     display: 'flex',
@@ -39,9 +39,14 @@ export const Login: React.FC = () => {
         mode: "onSubmit",
         defaultValues: { email: "", password: "" }
     });
-    const { login: loginUser } = useAuth();
+    const { login: loginUser, isLoggedIn } = useAuth();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const navigate = useNavigate();
+    useEffect(() => {
+        if (isLoggedIn()) {
+            navigate('/contacts');
+        }
+    }, [isLoggedIn, navigate]);
     const onSubmit = async (data: LoginData) => {
         console.log(data)
         const { error: loginError, data: user } = await loginUser(data);
@@ -50,8 +55,9 @@ export const Login: React.FC = () => {
             setErrorMessage(loginError);
             return;
         }
-        navigate('/Home');
+        navigate('/contacts');
     };
+
 
     return (
         <Root>
