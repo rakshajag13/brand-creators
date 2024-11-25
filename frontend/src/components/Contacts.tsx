@@ -24,10 +24,20 @@ import { styled } from '@mui/material/styles';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     fontWeight: 501
 }));
+interface Contact {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    role: string;
+    status: string;
+    clientId: number;
+}
 
 const Contacts = () => {
     // Mock data for contacts
-    const contacts = [
+    const totalContacts: Contact[] = [
         { id: 1, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
         { id: 2, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
         { id: 3, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
@@ -37,11 +47,23 @@ const Contacts = () => {
         { id: 7, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
         { id: 8, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
         { id: 9, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
+        { id: 10, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
+        { id: 12, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
+        { id: 13, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
+        { id: 14, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
+        { id: 15, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
+        { id: 16, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
+        { id: 17, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
+        { id: 18, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
+        { id: 19, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
     ];
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [contacts, setContacts] = React.useState<Contact[]>(totalContacts.slice(0, 10));
 
-    const [dense, setDense] = React.useState(false);
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+
+
     /*************  ✨ Codeium Command ⭐  *************/
     /**
      * Updates the current page in the pagination state.
@@ -52,11 +74,14 @@ const Contacts = () => {
     /******  ff408962-f384-4eba-ba5e-d1a396ce9f41  *******/
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
+        setContacts(totalContacts.slice(newPage * rowsPerPage, (newPage + 1) * rowsPerPage));
     };
 
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
+        setContacts(totalContacts.slice(0, parseInt(event.target.value, 10)));
         setPage(0);
+
     };
 
 
@@ -86,9 +111,7 @@ const Contacts = () => {
                     </Typography>
                 ) : (
                     <Typography
-
                         style={{ fontWeight: 501 }}
-
                     >
                         Contacts
                     </Typography>
@@ -113,14 +136,13 @@ const Contacts = () => {
     return (
         <>
             <EnhancedTableToolbar numSelected={0} />
-            <Paper sx={{ width: '100%', mb: 2, overflow: 'hidden', position: 'relative' }}>
+            <Paper sx={{ width: '100%', mb: 2, overflow: 'hidden', }}>
 
-                <TableContainer sx={{ maxHeight: 440 }}>
+                <TableContainer sx={{ maxHeight: '100vh', height: 'calc(100vh - 200px)' }}>
                     <Table
                         sx={{ minWidth: 600 }}
                         stickyHeader
                         aria-label="dense table"
-
 
                     >
                         <TableHead>
@@ -171,8 +193,8 @@ const Contacts = () => {
                 <TablePagination
 
                     component="div"
-                    count={contacts.length}
-                    rowsPerPage={50}
+                    count={totalContacts.length}
+                    rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
