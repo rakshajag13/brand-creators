@@ -10,15 +10,20 @@ import {
     Typography,
     Checkbox,
     TablePagination,
-    Box,
+
     IconButton,
     Tooltip,
     Toolbar,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { styled } from '@mui/material/styles';
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    fontWeight: 501
+}));
 
 const Contacts = () => {
     // Mock data for contacts
@@ -113,8 +118,9 @@ const Contacts = () => {
                 <TableContainer sx={{ maxHeight: 440 }}>
                     <Table
                         sx={{ minWidth: 600 }}
+                        stickyHeader
+                        aria-label="dense table"
 
-                        stickyHeader aria-label="sticky table"
 
                     >
                         <TableHead>
@@ -130,11 +136,11 @@ const Contacts = () => {
                                         }}
                                     />
                                 </TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell>Phone</TableCell>
-                                <TableCell>Role</TableCell>
-                                <TableCell>Status</TableCell>
+                                <StyledTableCell >Name</StyledTableCell>
+                                <StyledTableCell >Email</StyledTableCell>
+                                <StyledTableCell >Phone</StyledTableCell>
+                                <StyledTableCell >Role</StyledTableCell>
+                                <StyledTableCell >Status</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -152,7 +158,7 @@ const Contacts = () => {
                                         />
                                     </TableCell>
 
-                                    <TableCell>{contact.firstName + " " + contact.lastName}</TableCell>
+                                    <TableCell >{contact.firstName + " " + contact.lastName}</TableCell>
                                     <TableCell>{contact.email}</TableCell>
                                     <TableCell>{contact.phone}</TableCell>
                                     <TableCell>{contact.role}</TableCell>
