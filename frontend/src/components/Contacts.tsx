@@ -14,12 +14,15 @@ import {
     IconButton,
     Tooltip,
     Toolbar,
+    Button,
+    Dialog,
 } from '@mui/material';
 
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { styled } from '@mui/material/styles';
+import { CreateContactModal } from './CreateContactModal';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     fontWeight: 501
@@ -61,6 +64,7 @@ const Contacts = () => {
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [openCreateContactModal, setOpenCreateContactModal] = React.useState(false);
 
 
 
@@ -83,11 +87,16 @@ const Contacts = () => {
         setPage(0);
 
     };
+    const handleCreateContact = () => {
+        setOpenCreateContactModal(false);
+
+    }
 
 
     interface EnhancedTableToolbarProps {
         numSelected: number;
     }
+
     function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         const { numSelected } = props;
         return (
@@ -96,6 +105,7 @@ const Contacts = () => {
                     {
                         display: 'flex',
                         justifyContent: 'space-between',
+                        border: '1px solid #ccc',
                     }
                 }
 
@@ -116,7 +126,16 @@ const Contacts = () => {
                         Contacts
                     </Typography>
                 )}
-                {numSelected > 0 ? (
+                <Button
+                    type="submit"
+                    variant="outlined"
+                    color="inherit"
+                    style={{ fontWeight: 400 }}
+                    onClick={() => setOpenCreateContactModal(true)}
+                >
+                    Create Contact
+                </Button>
+                {/* {numSelected > 0 ? (
                     <Tooltip title="Delete">
                         <IconButton>
                             <DeleteIcon />
@@ -128,10 +147,12 @@ const Contacts = () => {
                             <FilterListIcon />
                         </IconButton>
                     </Tooltip>
-                )}
-            </Toolbar>
+                )} */}
+            </Toolbar >
         );
     }
+
+
 
     return (
         <>
@@ -197,6 +218,7 @@ const Contacts = () => {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
+            <CreateContactModal open={openCreateContactModal} onSubmit={handleCreateContact} onClose={() => setOpenCreateContactModal(false)} />
 
         </>
 
