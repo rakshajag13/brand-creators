@@ -137,12 +137,9 @@ const Contacts = () => {
         <>
             <EnhancedTableToolbar numSelected={0} />
             <Paper sx={{ width: '100%', mb: 2, overflow: 'hidden', }}>
-
                 <TableContainer sx={{ maxHeight: '100vh', height: 'calc(100vh - 200px)' }}>
                     <Table
-                        sx={{ minWidth: 600 }}
                         stickyHeader
-                        aria-label="dense table"
 
                     >
                         <TableHead>
