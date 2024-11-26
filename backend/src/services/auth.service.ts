@@ -1,7 +1,8 @@
 import { PrismaClient, User, UserRole } from "@prisma/client";
 import { comparePasswords, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
-//import { registerSchema } from '../validators/auth.validator';
+import { Expiry } from "../validators/auth.validator";
+import { sendPasswordResetEmail } from "../utils/sendEmail";
 
 const prisma = new PrismaClient();
 
@@ -17,6 +18,15 @@ interface RegisterData {
 interface LoginData {
   email: string;
   password: string;
+}
+
+interface forgotPasswordData {
+  email: string;
+}
+
+export interface resetPasswordData {
+  newPassword: string;
+  token: string;
 }
 
 interface AuthResponse {
@@ -109,8 +119,63 @@ async function login(data: LoginData): Promise<AuthResponse> {
   }
 }
 
+async function forgotPassword(data: forgotPasswordData): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { email: data.email },
+  });
+
+  if (!user) {
+    throw new Error("Invalid Credientials");
+  }
+
+  // Update user with reset token
+  const resetToken = generateToken(user, Expiry.ONE_HOUR);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      resetToken,
+      updatedAt: new Date(),
+    },
+  });
+
+  const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+
+  await sendPasswordResetEmail(data.email, resetLink);
+}
+
+async function resetPassword(data: resetPasswordData): Promise<void> {
+  const user = await prisma.user.findFirst({
+    where: { resetToken: data.token },
+  });
+
+  if (!user) {
+    throw new Error("Invalid or expired reset token'");
+  }
+
+  const hashedPassword = await hashPassword(data.newPassword);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedPassword,
+      resetToken: null,
+    },
+  });
+}
+async function validateResetToken(token: string): Promise<boolean> {
+  console.log(token);
+  const user = await prisma.user.findFirst({
+    where: { resetToken: token },
+  });
+  console.log(user);
+  return !!user;
+}
 // Export functions
 export const authService = {
   register,
   login,
+  forgotPassword,
+  resetPassword,
+  validateResetToken,
 };

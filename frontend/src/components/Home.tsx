@@ -7,6 +7,8 @@ import Contacts from './Contacts';
 import PaymentComponent from './Payments';
 import ProtectedRoute from './ProtectedRoute';
 import { useAuth } from 'context/AuthContext';
+import { ResetPassword } from './ResetPassword';
+import { ForgotPassword } from './ForgotPassword';
 
 const App = () => {
 
@@ -41,6 +43,18 @@ const App = () => {
                         isLoggedIn() ?
                             <Navigate to="/contacts" replace /> :
                             <Register />
+                    }
+                />
+                <Route
+                    path="/forgot-password"
+                    element={
+                        <ForgotPassword />
+                    }
+                />
+                <Route
+                    path="/reset-password/:token"
+                    element={
+                        <ResetPassword />
                     }
                 />
                 <Route

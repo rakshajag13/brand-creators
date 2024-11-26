@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
                         Login
                     </Button>
                     <Grid2 container justifyContent="center" display={"flex"} alignItems={"center"}>
-                        <Link to="/forgotPassword" style={{ "textDecoration": "none", "color": "#007BFF" }}>
+                        <Link to="/forgot-password" style={{ "textDecoration": "none", "color": "#007BFF" }}>
                             Forgot Password ?
                         </Link>
                     </Grid2>
