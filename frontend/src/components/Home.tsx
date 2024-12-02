@@ -9,6 +9,7 @@ import ProtectedRoute from './ProtectedRoute';
 import { useAuth } from 'context/AuthContext';
 import { ResetPassword } from './ResetPassword';
 import { ForgotPassword } from './ForgotPassword';
+import { ContactProvider } from 'context/ContactContext';
 
 const App = () => {
 
@@ -72,7 +73,9 @@ const App = () => {
                     element={
 
                         <ProtectedRoute>
-                            <Contacts />
+                            <ContactProvider>
+                                <Contacts />
+                            </ContactProvider>
                         </ProtectedRoute>
                     }
                 />

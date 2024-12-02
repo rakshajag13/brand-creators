@@ -44,12 +44,12 @@ async function register(data: RegisterData): Promise<AuthResponse> {
       throw new Error("Email already registered");
     }
 
-    const isPassword = await hashPassword(data.password);
+    const hashedPass = await hashPassword(data.password);
 
     const user = await prisma.user.create({
       data: {
         ...data,
-        password: isPassword,
+        password: hashedPass,
       },
     });
 

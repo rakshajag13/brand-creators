@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
     Table,
     TableBody,
@@ -10,23 +11,19 @@ import {
     Typography,
     Checkbox,
     TablePagination,
-
-    IconButton,
-    Tooltip,
     Toolbar,
     Button,
-    Dialog,
 } from '@mui/material';
 
-
-import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { styled } from '@mui/material/styles';
 import { CreateContactModal } from './CreateContactModal';
+import { useContact } from 'context/ContactContext';
+import { Pagination } from 'types/contact';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     fontWeight: 501
 }));
+
 interface Contact {
     id: number;
     firstName: string;
@@ -38,77 +35,80 @@ interface Contact {
     clientId: number;
 }
 
-const Contacts = () => {
-    // Mock data for contacts
-    const totalContacts: Contact[] = [
-        { id: 1, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 2, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 3, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
-        { id: 4, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 5, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 6, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
-        { id: 7, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 8, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 9, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
-        { id: 10, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 12, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 13, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
-        { id: 14, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 15, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 16, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
-        { id: 17, firstName: 'John ', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 18, firstName: 'Jane ', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', role: 'CREATOR', status: 'active', clientId: 1 },
-        { id: 19, firstName: 'Alice ', lastName: 'Johnson', email: 'alice.johnson@example.com', phone: '456-789-0123', role: 'CREATOR', status: 'inactive', clientId: 1 },
-    ];
-    const [contacts, setContacts] = React.useState<Contact[]>(totalContacts.slice(0, 10));
+const Contacts = React.memo(() => {
+    const { getAllContacts } = useContact();
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [pagination, setPagination] = useState<Pagination>({
+        totalContacts: 0,
+        pageSize: 10,
+        currentPage: 1,
+        totalPages: 0,
+    });
+    const [openCreateContactModal, setOpenCreateContactModal] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
-    const [openCreateContactModal, setOpenCreateContactModal] = React.useState(false);
+    // Memoize fetchContacts to prevent unnecessary re-creation
+    const fetchContacts = useCallback(async (page: number, pageSize: number) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await getAllContacts({ page, pageSize });
 
+            setContacts(data.contacts);
+            setPagination(prevPagination => ({
+                ...prevPagination,
+                ...data.pagination,
+                currentPage: page
+            }));
+        } catch (err: any) {
+            setError(err.message || 'An error occurred');
+        } finally {
+            setLoading(false);
+        }
+    }, [getAllContacts]);
 
+    // Use useMemo to memoize pagination parameters
+    const paginationParams = useMemo(() => ({
+        page: pagination.currentPage,
+        pageSize: pagination.pageSize
+    }), [pagination.currentPage, pagination.pageSize]);
 
-    /*************  ✨ Codeium Command ⭐  *************/
-    /**
-     * Updates the current page in the pagination state.
-     * 
-     * @param event - The event that triggered the page change.
-     * @param newPage - The new page number to set.
-     */
-    /******  ff408962-f384-4eba-ba5e-d1a396ce9f41  *******/
+    // Optimized useEffect with memoized dependencies
+    useEffect(() => {
+        fetchContacts(paginationParams.page, paginationParams.pageSize);
+    }, [fetchContacts, paginationParams]);
+
     const handleChangePage = (event: unknown, newPage: number) => {
-        setPage(newPage);
-        setContacts(totalContacts.slice(newPage * rowsPerPage, (newPage + 1) * rowsPerPage));
+        setPagination(prevPagination => ({
+            ...prevPagination,
+            currentPage: newPage + 1 // Adjust for zero-indexing
+        }));
     };
 
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setContacts(totalContacts.slice(0, parseInt(event.target.value, 10)));
-        setPage(0);
-
+        const newPageSize = parseInt(event.target.value, 10);
+        setPagination(prevPagination => ({
+            ...prevPagination,
+            pageSize: newPageSize,
+            currentPage: 1 // Reset to first page when changing rows per page
+        }));
     };
+
     const handleCreateContact = () => {
         setOpenCreateContactModal(false);
+        // Optionally, refresh contacts after creation
+        fetchContacts(pagination.currentPage, pagination.pageSize);
+    };
 
-    }
-
-
-    interface EnhancedTableToolbarProps {
-        numSelected: number;
-    }
-
-    function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-        const { numSelected } = props;
+    function EnhancedTableToolbar({ numSelected }: { numSelected: number }) {
         return (
             <Toolbar
-                style={
-                    {
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        border: '1px solid #ccc',
-                    }
-                }
-
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    border: '1px solid #ccc',
+                }}
             >
                 {numSelected > 0 ? (
                     <Typography
@@ -120,9 +120,7 @@ const Contacts = () => {
                         {numSelected} selected
                     </Typography>
                 ) : (
-                    <Typography
-                        style={{ fontWeight: 501 }}
-                    >
+                    <Typography style={{ fontWeight: 501 }}>
                         Contacts
                     </Typography>
                 )}
@@ -135,52 +133,36 @@ const Contacts = () => {
                 >
                     Create Contact
                 </Button>
-                {/* {numSelected > 0 ? (
-                    <Tooltip title="Delete">
-                        <IconButton>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
-                ) : (
-                    <Tooltip title="Filter list">
-                        <IconButton>
-                            <FilterListIcon />
-                        </IconButton>
-                    </Tooltip>
-                )} */}
-            </Toolbar >
+            </Toolbar>
         );
     }
 
-
+    // Display error if exists
+    if (error) {
+        return <Typography color="error">{error}</Typography>;
+    }
 
     return (
         <>
             <EnhancedTableToolbar numSelected={0} />
-            <Paper sx={{ width: '100%', mb: 2, overflow: 'hidden', }}>
+            <Paper sx={{ width: '100%', mb: 2, overflow: 'hidden' }}>
                 <TableContainer sx={{ maxHeight: '100vh', height: 'calc(100vh - 200px)' }}>
-                    <Table
-                        stickyHeader
-
-                    >
+                    <Table stickyHeader>
                         <TableHead>
-                            <TableRow >
+                            <TableRow>
                                 <TableCell padding="checkbox">
                                     <Checkbox
                                         color="primary"
-                                        // indeterminate={numSelected > 0 && numSelected < rowCount}
-                                        // checked={rowCount > 0 && numSelected === rowCount}
-                                        // onChange={onSelectAllClick}
                                         inputProps={{
-                                            'aria-label': 'select all desserts',
+                                            'aria-label': 'select all contacts',
                                         }}
                                     />
                                 </TableCell>
-                                <StyledTableCell >Name</StyledTableCell>
-                                <StyledTableCell >Email</StyledTableCell>
-                                <StyledTableCell >Phone</StyledTableCell>
-                                <StyledTableCell >Role</StyledTableCell>
-                                <StyledTableCell >Status</StyledTableCell>
+                                <StyledTableCell>Name</StyledTableCell>
+                                <StyledTableCell>Email</StyledTableCell>
+                                <StyledTableCell>Phone</StyledTableCell>
+                                <StyledTableCell>Role</StyledTableCell>
+                                <StyledTableCell>Status</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -189,16 +171,12 @@ const Contacts = () => {
                                     <TableCell padding="checkbox">
                                         <Checkbox
                                             color="primary"
-                                            // indeterminate={numSelected > 0 && numSelected < rowCount}
-                                            // checked={rowCount > 0 && numSelected === rowCount}
-                                            // onChange={onSelectAllClick}
                                             inputProps={{
-                                                'aria-label': 'select all desserts',
+                                                'aria-label': 'select contact',
                                             }}
                                         />
                                     </TableCell>
-
-                                    <TableCell >{contact.firstName + " " + contact.lastName}</TableCell>
+                                    <TableCell>{`${contact.firstName} ${contact.lastName}`}</TableCell>
                                     <TableCell>{contact.email}</TableCell>
                                     <TableCell>{contact.phone}</TableCell>
                                     <TableCell>{contact.role}</TableCell>
@@ -209,20 +187,23 @@ const Contacts = () => {
                     </Table>
                 </TableContainer>
                 <TablePagination
-
                     component="div"
-                    count={totalContacts.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
+                    count={pagination?.totalContacts}
+                    rowsPerPage={pagination?.pageSize}
+                    page={pagination?.currentPage - 1} // Zero-index for Material-UI
+                    onPageChange={(event, newPage) => {
+                        handleChangePage(event, newPage);
+                    }}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <CreateContactModal open={openCreateContactModal} onSubmit={handleCreateContact} onClose={() => setOpenCreateContactModal(false)} />
-
+            <CreateContactModal
+                open={openCreateContactModal}
+                onSubmit={handleCreateContact}
+                onClose={() => setOpenCreateContactModal(false)}
+            />
         </>
-
     );
-};
+});
 
 export default Contacts;
