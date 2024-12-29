@@ -1,0 +1,31 @@
+# Server
+NODE_ENV=development
+PORT=4000
+
+# Database
+DATABASE_URL="url"
+
+
+# Redis
+REDIS_URL="redis://localhost:6379"
+
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRY=24h
+
+# AWS
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=your-region
+AWS_BUCKET_NAME=your-bucket-name
+
+# Email
+SMTP_HOST=smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USER=your-user
+SMTP_PASS=your-password
+
+#MAIL
+MAIL_HOST="gmail"
+MAIL_USERNAME="smtp email id"
+MAIL_PASSWORD="key or password"

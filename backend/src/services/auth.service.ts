@@ -45,11 +45,11 @@ async function register(data: RegisterData): Promise<AuthResponse> {
     }
 
     const hashedPass = await hashPassword(data.password);
-
     const user = await prisma.user.create({
       data: {
         ...data,
         password: hashedPass,
+        resetToken: "",
       },
     });
 
@@ -159,7 +159,7 @@ async function resetPassword(data: resetPasswordData): Promise<void> {
     where: { id: user.id },
     data: {
       password: hashedPassword,
-      resetToken: null,
+      resetToken: "",
     },
   });
 }

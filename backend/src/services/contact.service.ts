@@ -44,6 +44,7 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
       data: {
         ...data,
         password: "",
+        resetToken: "",
       },
     });
 
