@@ -125,6 +125,11 @@ export const Login: React.FC = () => {
                             <Link to="/register" style={{ "textDecoration": "none", "color": "#007BFF" }}>
                                 Signup
                             </Link>
+                            /
+                            <Link to="/brand-signup" style={{ "textDecoration": "none", "color": "#007BFF" }}>
+                                Brand Signup
+                            </Link>
+
                         </Grid2>
                     </Grid2>
                 </FormContainer>

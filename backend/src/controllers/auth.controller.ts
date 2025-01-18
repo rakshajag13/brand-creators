@@ -14,9 +14,23 @@ export async function register(req: Request, res: Response) {
   }
 }
 
+export async function brandSignup(req: Request, res: Response) {
+  try {
+    const { clientId } = await authService.brandSignup(req.body);
+    res.status(201).json({ clientId });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+}
+
 export async function login(req: Request, res: Response) {
   try {
     const { user, token } = await authService.login(req.body);
+    //res.setCookie("clientId", clientId);
     res.status(200).json({ user, token });
   } catch (error) {
     if (error instanceof Error) {
@@ -78,6 +92,7 @@ export async function resetPassword(req: Request, res: Response) {
 
 export const authController = {
   register,
+  brandSignup,
   login,
   forgotPassword,
   resetPassword,

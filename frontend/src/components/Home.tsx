@@ -10,6 +10,7 @@ import { useAuth } from 'context/AuthContext';
 import { ResetPassword } from './ResetPassword';
 import { ForgotPassword } from './ForgotPassword';
 import { ContactProvider } from 'context/ContactContext';
+import { BrandSignup } from './brandSignup';
 
 const App = () => {
 
@@ -36,6 +37,15 @@ const App = () => {
                         isLoggedIn() ?
                             <Navigate to="/contacts" replace /> :
                             <Navigate to="/login" replace />
+                    }
+                />
+
+                <Route
+                    path="/brand-signup"
+                    element={
+                        isLoggedIn() ?
+                            <Navigate to="/contacts" replace /> :
+                            <BrandSignup />
                     }
                 />
                 <Route

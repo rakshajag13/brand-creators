@@ -6,6 +6,7 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  brandSignupSchema,
 } from "../validators/auth.validator";
 
 const router = Router();
@@ -21,6 +22,11 @@ router.post(
   "/reset-password",
   validate(resetPasswordSchema),
   authController.resetPassword
+);
+router.post(
+  "/brand-signup",
+  validate(brandSignupSchema),
+  authController.brandSignup
 );
 
 export default router;

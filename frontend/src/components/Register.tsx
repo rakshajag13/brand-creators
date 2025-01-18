@@ -37,7 +37,7 @@ export const registerSchema = z.object({
 });
 
 export const Register: React.FC = () => {
-    const { register, handleSubmit, control, formState: { errors } } = useForm<RegisterData>({
+    const { handleSubmit, control, formState: { errors } } = useForm<RegisterData>({
         resolver: zodResolver(registerSchema),
         mode: "onSubmit",
         defaultValues: { email: "", password: "", firstName: "", lastName: "", phone: "", role: "CREATOR" }

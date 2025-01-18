@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, LoginData, RegisterData, AuthResponse } from "../types/auth";
+import { BrandSignupData } from "types/brandSignup";
 
 
 interface AuthContextType {
@@ -9,6 +10,7 @@ interface AuthContextType {
     register: (data: RegisterData) => Promise<void>;
     logout: () => void;
     isLoggedIn: () => boolean;
+    brandSignup: (data: BrandSignupData) => Promise<{ id: number; email: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -70,6 +72,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             throw error;
         }
     };
+
+    const brandSignup = async (data: BrandSignupData) => {
+        try {
+            const res = await fetch("http://localhost:4000/api/auth/brand-signup", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: { "Content-Type": "application/json" },
+            })
+            if (!res.ok) {
+                throw new Error("Failed to Signup");
+            }
+            const { id, email } = await res.json();
+            return { id, email };
+
+        } catch (error) {
+            throw error;
+        }
+    };
     const logout = () => {
         localStorage.removeItem("token");
         setUser(null);
@@ -79,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return !!localStorage.getItem("user") && !!localStorage.getItem("token");
     };
 
-    return (<AuthContext.Provider value={{ user, isLoading, login, register, logout, isLoggedIn }}>
+    return (<AuthContext.Provider value={{ user, isLoading, login, register, logout, isLoggedIn, brandSignup }}>
         {children}
     </AuthContext.Provider>)
 };

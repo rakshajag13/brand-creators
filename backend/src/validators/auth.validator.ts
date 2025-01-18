@@ -13,6 +13,21 @@ export const registerSchema = z.object({
   }),
 });
 
+export const brandSignupSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    companyName: z
+      .string()
+      .min(2, "Company name must be at least 2 characters"),
+    industry: z.string(),
+    website: z.string(),
+    businessType: z.string(),
+    phone: z.string().optional(),
+    domain: z.string(),
+  }),
+});
+
 export const loginSchema = z.object({
   body: z.object({
     email: z.string().email("Invalid email format"),

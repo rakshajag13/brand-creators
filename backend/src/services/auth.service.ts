@@ -1,4 +1,4 @@
-import { PrismaClient, User, UserRole } from "@prisma/client";
+import { PrismaClient, User, UserRole, UserStatus } from "@prisma/client";
 import { comparePasswords, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { Expiry } from "../validators/auth.validator";
@@ -13,6 +13,18 @@ interface RegisterData {
   lastName: string;
   phone?: string;
   role: UserRole;
+}
+
+interface BrandSignupData {
+  email: string;
+  password: string;
+  companyName: string;
+  industry: string;
+  website: string;
+  businessType: string;
+  phone?: string;
+  domain: string;
+  status: UserStatus;
 }
 
 interface LoginData {
@@ -55,19 +67,6 @@ async function register(data: RegisterData): Promise<AuthResponse> {
 
     const { password, ...userWithoutPassword } = user;
     // const token=generateToken(user);
-
-    // If role is CLIENT, create a client record
-    if (data.role === "CLIENT") {
-      await prisma.client.create({
-        data: {
-          companyName: "",
-          industry: "",
-          businessType: "",
-          users: { connect: { id: user.id } },
-        },
-      });
-    }
-
     // If role is CREATOR, create a creator record
     if (data.role === "CREATOR") {
       await prisma.creator.create({
@@ -79,6 +78,59 @@ async function register(data: RegisterData): Promise<AuthResponse> {
     }
 
     return { user: userWithoutPassword };
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function brandSignup(
+  data: BrandSignupData
+): Promise<{ clientId: number }> {
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      throw new Error("Email already registered");
+    }
+
+    const hashedPass = await hashPassword(data.password);
+
+    const user: RegisterData = {
+      email: data.email,
+      password: hashedPass,
+      firstName: data.companyName,
+      lastName: data.companyName,
+      phone: data.phone,
+      role: UserRole.ADMIN,
+    };
+    return prisma.$transaction(async (tx) => {
+      const registerdUser = await tx.user.create({
+        data: {
+          ...user,
+          password: hashedPass,
+          resetToken: "",
+        },
+      });
+      const client = await tx.client.create({
+        data: {
+          companyName: data.companyName,
+          industry: data.industry,
+          businessType: data.businessType,
+          website: data.website,
+          users: { connect: { id: registerdUser.id } },
+        },
+      });
+      await tx.clientDomain.create({
+        data: {
+          domain: data.domain,
+          client: { connect: { id: client.id } },
+        },
+      });
+
+      return { clientId: client.id };
+    });
   } catch (error) {
     throw error;
   }
@@ -174,6 +226,7 @@ async function validateResetToken(token: string): Promise<boolean> {
 // Export functions
 export const authService = {
   register,
+  brandSignup,
   login,
   forgotPassword,
   resetPassword,
