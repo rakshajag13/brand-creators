@@ -3,6 +3,14 @@ import { comparePasswords, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { Expiry } from "../validators/auth.validator";
 import { sendPasswordResetEmail } from "../utils/sendEmail";
+import {
+  createSession,
+  createUser,
+  createUserByCreatorRole,
+  getFirstUserMatchByFilter,
+  getUserByEmail,
+  updateUser,
+} from "../repositories/userRepository";
 
 const prisma = new PrismaClient();
 
@@ -48,32 +56,25 @@ interface AuthResponse {
 
 async function register(data: RegisterData): Promise<AuthResponse> {
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
+    const existingUser = await getUserByEmail(data.email);
     if (existingUser) {
       throw new Error("Email already registered");
     }
 
     const hashedPass = await hashPassword(data.password);
-    const user = await prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPass,
-        resetToken: "",
-      },
+    const user = await createUser({
+      ...data,
+      password: hashedPass,
+      resetToken: "",
     });
 
     const { password, ...userWithoutPassword } = user;
     // const token=generateToken(user);
     // If role is CREATOR, create a creator record
     if (data.role === "CREATOR") {
-      await prisma.creator.create({
-        data: {
-          userId: user.id,
-          expertise: [],
-        },
+      await createUserByCreatorRole({
+        userId: user.id,
+        expertise: [],
       });
     }
 
@@ -87,10 +88,7 @@ async function brandSignup(
   data: BrandSignupData
 ): Promise<{ clientId: number }> {
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
+    const existingUser = await getUserByEmail(data.email);
     if (existingUser) {
       throw new Error("Email already registered");
     }
@@ -122,6 +120,13 @@ async function brandSignup(
           users: { connect: { id: registerdUser.id } },
         },
       });
+      const existingDomain = await tx.clientDomain.findUnique({
+        where: { domain: data.domain },
+      });
+
+      if (existingDomain) {
+        throw new Error(`Domain ${data.domain} already exists.`);
+      }
       await tx.clientDomain.create({
         data: {
           domain: data.domain,
@@ -138,9 +143,7 @@ async function brandSignup(
 
 async function login(data: LoginData): Promise<AuthResponse> {
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
+    const user = await getUserByEmail(data.email);
 
     if (!user) {
       throw new Error("Invalid Credientials");
@@ -158,12 +161,10 @@ async function login(data: LoginData): Promise<AuthResponse> {
     const { password, ...userWithoutPassword } = user;
     const token = generateToken(user);
 
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), //24 hours
-      },
+    await createSession({
+      userId: user.id,
+      token,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), //24 hours
     });
     return { user: userWithoutPassword, token };
   } catch (error) {
@@ -172,9 +173,7 @@ async function login(data: LoginData): Promise<AuthResponse> {
 }
 
 async function forgotPassword(data: forgotPasswordData): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { email: data.email },
-  });
+  const user = await getUserByEmail(data.email);
 
   if (!user) {
     throw new Error("Invalid Credientials");
@@ -183,13 +182,7 @@ async function forgotPassword(data: forgotPasswordData): Promise<void> {
   // Update user with reset token
   const resetToken = generateToken(user, Expiry.ONE_HOUR);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      resetToken,
-      updatedAt: new Date(),
-    },
-  });
+  await updateUser(user.id, { resetToken, updatedAt: new Date() });
 
   const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
 
@@ -197,9 +190,7 @@ async function forgotPassword(data: forgotPasswordData): Promise<void> {
 }
 
 async function resetPassword(data: resetPasswordData): Promise<void> {
-  const user = await prisma.user.findFirst({
-    where: { resetToken: data.token },
-  });
+  const user = await getFirstUserMatchByFilter(data.token);
 
   if (!user) {
     throw new Error("Invalid or expired reset token'");
@@ -207,20 +198,10 @@ async function resetPassword(data: resetPasswordData): Promise<void> {
 
   const hashedPassword = await hashPassword(data.newPassword);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      password: hashedPassword,
-      resetToken: "",
-    },
-  });
+  await updateUser(user.id, { password: hashedPassword, resetToken: "" });
 }
 async function validateResetToken(token: string): Promise<boolean> {
-  console.log(token);
-  const user = await prisma.user.findFirst({
-    where: { resetToken: token },
-  });
-  console.log(user);
+  const user = await getFirstUserMatchByFilter(token);
   return !!user;
 }
 // Export functions
