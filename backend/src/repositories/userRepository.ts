@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getAllUsers = async () => {
-  return prisma.user.findMany();
+export const getAllUsersContacts = async (condition: any) => {
+  return prisma.user.findMany(condition);
 };
 
 export const getUserByEmail = async (email: string) => {
@@ -18,9 +18,7 @@ export const createUser = async (data: any) => {
 };
 
 export const createClient = async (data: any) => {
-  return prisma.client.create({
-    data,
-  });
+  return prisma.client.create(data);
 };
 
 export const createSession = async (data: any) => {
@@ -45,5 +43,13 @@ export const updateUser = async (id: number, data: any) => {
 export const getFirstUserMatchByFilter = async (resetToken: string) => {
   return prisma.user.findFirst({
     where: { resetToken },
+  });
+};
+
+export const totalUsersCount = async (
+  searchCondition: Prisma.UserWhereInput
+) => {
+  return prisma.user.count({
+    where: searchCondition,
   });
 };

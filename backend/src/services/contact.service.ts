@@ -1,12 +1,20 @@
 import {
   Prisma,
-  PrismaClient,
+  // PrismaClient,
   User,
   UserRole,
   UserStatus,
 } from "@prisma/client";
+import {
+  createUser,
+  createClient,
+  createUserByCreatorRole,
+  getUserByEmail,
+  totalUsersCount,
+  getAllUsersContacts,
+} from "../repositories/userRepository";
 
-const prisma = new PrismaClient();
+//const prisma = new PrismaClient();
 
 interface ContactData {
   email: string;
@@ -32,41 +40,33 @@ interface ContactResponse {
 
 async function createContact(data: ContactData): Promise<ContactResponse> {
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
+    const existingUser = await getUserByEmail(data.email);
 
     if (existingUser) {
       throw new Error("Email already registered");
     }
 
-    const user = await prisma.user.create({
-      data: {
-        ...data,
-        password: "",
-        resetToken: "",
-      },
+    const user = await createUser({
+      ...data,
+      password: "",
+      resetToken: "",
     });
 
     // If role is CLIENT, create a client record
     if (data.role === "CLIENT") {
-      await prisma.client.create({
-        data: {
-          companyName: "",
-          industry: "",
-          businessType: "",
-          users: { connect: { id: user.id } },
-        },
+      await createClient({
+        companyName: "",
+        industry: "",
+        businessType: "",
+        users: { connect: { id: user.id } },
       });
     }
 
     // If role is CREATOR, create a creator record
     if (data.role === "CREATOR") {
-      await prisma.creator.create({
-        data: {
-          userId: user.id,
-          expertise: [],
-        },
+      await createUserByCreatorRole({
+        userId: user.id,
+        expertise: [],
       });
     }
 
@@ -78,9 +78,7 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
 
 async function getContactByEmail(email: string) {
   try {
-    const contact = await prisma.user.findUnique({
-      where: { email: email },
-    });
+    const contact = await getUserByEmail(email);
 
     if (!contact) {
       throw new Error("Contact not found");
@@ -119,8 +117,8 @@ async function getAllContacts(params: ContactQueryParams = {}) {
 
     // Fetch contacts with pagination and filtering
     const [totalContacts, contacts] = await Promise.all([
-      prisma.user.count({ where: searchCondition }),
-      prisma.user.findMany({
+      totalUsersCount(searchCondition),
+      getAllUsersContacts({
         where: searchCondition,
         select: {
           id: true,
@@ -136,6 +134,8 @@ async function getAllContacts(params: ContactQueryParams = {}) {
         skip,
         take: pageSize,
       }),
+      //prisma.user.count({ where: searchCondition }),
+      // prisma.user.findMany(),
     ]);
 
     return {
@@ -179,7 +179,7 @@ async function searchContacts(filters: {
       }),
     };
 
-    const contacts = await prisma.user.findMany({
+    const contacts = await getAllUsersContacts({
       where: whereCondition,
       select: {
         id: true,
@@ -193,6 +193,7 @@ async function searchContacts(filters: {
       },
       orderBy: { createdAt: "desc" },
     });
+    // prisma.user.findMany({});
     return contacts;
   } catch (error) {
     console.error("Error searching contacts:", error);
