@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import { authService } from "../services/auth.service";
+import { RegisterDTO } from "../dtos/auth.dto";
 
-export async function register(req: Request, res: Response) {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user, token } = await authService.register(req.body);
-    res.status(201).json({ user, token });
+    const data = RegisterDTO.parse(req.body);
+    const result = await authService.register(data);
+    res.status(201).json(result);
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });
@@ -12,9 +14,25 @@ export async function register(req: Request, res: Response) {
       res.status(500).json({ error: "Internal server error" });
     }
   }
-}
+};
 
-export async function brandSignup(req: Request, res: Response) {
+export const login = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await authService.login(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+};
+
+export const brandSignup = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { clientId } = await authService.brandSignup(req.body);
     res.status(201).json({ clientId });
@@ -25,23 +43,12 @@ export async function brandSignup(req: Request, res: Response) {
       res.status(500).json({ error: "Internal server error" });
     }
   }
-}
+};
 
-export async function login(req: Request, res: Response) {
-  try {
-    const { user, token } = await authService.login(req.body);
-    //res.setCookie("clientId", clientId);
-    res.status(200).json({ user, token });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(401).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: "Internal server error" });
-    }
-  }
-}
-
-export async function forgotPassword(req: Request, res: Response) {
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { email } = req.body;
     await authService.forgotPassword({ email });
@@ -50,7 +57,7 @@ export async function forgotPassword(req: Request, res: Response) {
       .json({ message: "Password reset instructions sent to your email" });
   } catch (error) {
     console.error("Forgot password error:", error);
-    if (error.message === "User not found") {
+    if (error instanceof Error && error.message === "User not found") {
       res.status(404).json({ message: "User not found" });
     }
 
@@ -59,14 +66,17 @@ export async function forgotPassword(req: Request, res: Response) {
       error: error.message,
     });
   }
-}
+};
 
-export async function resetPassword(req: Request, res: Response) {
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { token } = req.query;
     const { newPassword } = req.body;
 
-    const isValidToken = authService.validateResetToken(token as string);
+    const isValidToken = await authService.validateResetToken(token as string);
     if (!isValidToken) {
       res.status(400).json({
         message: "Invalid or expired reset token",
@@ -88,7 +98,7 @@ export async function resetPassword(req: Request, res: Response) {
       error: error.message,
     });
   }
-}
+};
 
 export const authController = {
   register,
