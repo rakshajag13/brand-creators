@@ -93,7 +93,7 @@ export default function PrimarySearchAppBar() {
           handleLogout={handleLogout}
         />
       </Box>
-      <AppDrawer open={drawerOpen} toggleDrawer={toggleDrawer} />
+      <AppDrawer open={drawerOpen} toggleDrawer={() => setDrawerOpen(false)} />
     </div>
   );
 }

@@ -1,12 +1,9 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-
 import List from "@mui/material/List";
-
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate } from "react-router-dom";
 
@@ -33,10 +30,6 @@ export default function AppDrawer({ open, toggleDrawer }: AppDrawerProps) {
     toggleDrawer(false);
   };
 
-  const handleClose = () => {
-    toggleDrawer(false);
-  };
-
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation">
       <List>
@@ -53,7 +46,7 @@ export default function AppDrawer({ open, toggleDrawer }: AppDrawerProps) {
 
   return (
     <div>
-      <Drawer open={open} onClose={handleClose}>
+      <Drawer open={open} onClose={toggleDrawer}>
         {DrawerList}
       </Drawer>
     </div>
