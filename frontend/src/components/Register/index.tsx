@@ -89,8 +89,12 @@ export const Register: React.FC = () => {
             textAlign="center"
             fontWeight="bold"
             gutterBottom
+            sx={{
+              marginBottom: "2rem",
+              color: "primary.main",
+            }}
           >
-            Signup
+            Create Your Account
           </Typography>
 
           {FORM_FIELDS.map((field) => (
@@ -109,26 +113,47 @@ export const Register: React.FC = () => {
             variant="contained"
             color="primary"
             fullWidth
-            sx={{ marginTop: "0.5rem" }}
+            size="large"
+            sx={{
+              marginTop: "2rem",
+              marginBottom: "1.5rem",
+              padding: "0.8rem",
+              borderRadius: "8px",
+              textTransform: "none",
+              fontSize: "1.1rem",
+              fontWeight: 600,
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+              },
+              transition: "all 0.2s ease-in-out",
+            }}
           >
-            Signup
+            Create Account
           </Button>
 
           <Grid2
             container
             justifyContent="center"
-            display="flex"
             alignItems="center"
+            spacing={1}
+            sx={{ marginTop: "0.5rem" }}
           >
-            <Typography variant="subtitle1">
-              Already have an account?
-            </Typography>
-            <Grid2 sx={{ marginLeft: "0.5rem" }}>
+            <Grid2>
+              <Typography variant="body1" color="text.secondary">
+                Already have an account?
+              </Typography>
+            </Grid2>
+            <Grid2>
               <Link
                 to="/login"
-                style={{ textDecoration: "none", color: "#007BFF" }}
+                style={{
+                  textDecoration: "none",
+                  color: "primary.main",
+                  fontWeight: 600,
+                }}
               >
-                Login
+                Login here
               </Link>
             </Grid2>
           </Grid2>
