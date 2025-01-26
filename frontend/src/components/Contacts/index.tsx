@@ -103,12 +103,23 @@ export const Contacts = () => {
   };
 
   if (error) {
-    return <Typography color="error">{error}</Typography>;
+    return (
+      <Paper sx={{ p: 3, maxWidth: "1200px", margin: "24px auto" }}>
+        <Typography color="error">{error}</Typography>
+      </Paper>
+    );
   }
 
   if (loading) {
     return (
-      <Paper sx={{ width: "100%", mb: 2, p: 3, textAlign: "center" }}>
+      <Paper
+        sx={{
+          p: 3,
+          maxWidth: "1200px",
+          margin: "24px auto",
+          textAlign: "center",
+        }}
+      >
         <Typography>Loading contacts...</Typography>
       </Paper>
     );
