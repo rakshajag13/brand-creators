@@ -1,4 +1,6 @@
-import { Button, Toolbar, Typography } from "@mui/material";
+import { Toolbar, Typography, IconButton, Tooltip } from "@mui/material";
+import { Delete, Edit, Add } from "@mui/icons-material";
+import { alpha } from "@mui/material/styles";
 
 interface ContactsToolbarProps {
   numSelected: number;
@@ -8,33 +10,63 @@ interface ContactsToolbarProps {
 export const ContactsToolbar = ({
   numSelected,
   onCreateContact,
-}: ContactsToolbarProps) => (
-  <Toolbar
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      border: "1px solid #ccc",
-    }}
-  >
-    {numSelected > 0 ? (
-      <Typography
-        sx={{ flex: "1 1 100%" }}
-        color="inherit"
-        variant="subtitle1"
-        component="div"
-      >
-        {numSelected} selected
-      </Typography>
-    ) : (
-      <Typography sx={{ fontWeight: 501 }}>Contacts</Typography>
-    )}
-    <Button
-      variant="outlined"
-      color="inherit"
-      sx={{ fontWeight: 400 }}
-      onClick={onCreateContact}
+}: ContactsToolbarProps) => {
+  return (
+    <Toolbar
+      sx={{
+        pl: { sm: 2 },
+        pr: { xs: 1, sm: 1 },
+        ...(numSelected > 0 && {
+          bgcolor: (theme) =>
+            alpha(
+              theme.palette.primary.main,
+              theme.palette.action.activatedOpacity
+            ),
+        }),
+      }}
     >
-      Create Contact
-    </Button>
-  </Toolbar>
-);
+      {numSelected > 0 ? (
+        <Typography
+          sx={{ flex: "1 1 100%" }}
+          color="inherit"
+          variant="subtitle1"
+          component="div"
+        >
+          {numSelected} selected
+        </Typography>
+      ) : (
+        <Typography
+          sx={{ flex: "1 1 100%" }}
+          variant="h6"
+          id="tableTitle"
+          component="div"
+        >
+          Contacts
+        </Typography>
+      )}
+
+      {numSelected > 0 ? (
+        <>
+          <Tooltip title="Delete">
+            <IconButton>
+              <Delete />
+            </IconButton>
+          </Tooltip>
+          {numSelected === 1 && (
+            <Tooltip title="Edit">
+              <IconButton>
+                <Edit />
+              </IconButton>
+            </Tooltip>
+          )}
+        </>
+      ) : (
+        <Tooltip title="Add Contact">
+          <IconButton onClick={onCreateContact}>
+            <Add />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Toolbar>
+  );
+};
