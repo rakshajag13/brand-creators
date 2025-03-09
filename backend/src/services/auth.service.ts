@@ -1,4 +1,4 @@
-import { PrismaClient, User, UserRole, UserStatus } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import { comparePasswords, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { Expiry } from "../validators/auth.validator";
@@ -11,50 +11,26 @@ import {
   getUserByEmail,
   updateUser,
 } from "../repositories/userRepository";
+import {
+  RegisterDTO,
+  BrandSignupDTO,
+  LoginDTO,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
+  type RegisterData,
+  type BrandSignupData,
+  type LoginData,
+  type ForgotPasswordData,
+  type ResetPasswordData,
+  type AuthResponse,
+} from "../dtos/auth.dto";
 
 const prisma = new PrismaClient();
 
-interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  role: UserRole;
-}
-
-interface BrandSignupData {
-  email: string;
-  password: string;
-  companyName: string;
-  industry: string;
-  website: string;
-  businessType: string;
-  phone?: string;
-  domain: string;
-  status: UserStatus;
-}
-
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface forgotPasswordData {
-  email: string;
-}
-
-export interface resetPasswordData {
-  newPassword: string;
-  token: string;
-}
-
-interface AuthResponse {
-  user: Omit<User, "password">;
-  token?: string;
-}
-
 async function register(data: RegisterData): Promise<AuthResponse> {
+  // First validate the data
+  RegisterDTO.parse(data);
+
   try {
     const existingUser = await getUserByEmail(data.email);
     if (existingUser) {
@@ -87,6 +63,9 @@ async function register(data: RegisterData): Promise<AuthResponse> {
 async function brandSignup(
   data: BrandSignupData
 ): Promise<{ clientId: number }> {
+  // First validate the data
+  BrandSignupDTO.parse(data);
+
   try {
     const existingUser = await getUserByEmail(data.email);
     if (existingUser) {
@@ -142,6 +121,9 @@ async function brandSignup(
 }
 
 async function login(data: LoginData): Promise<AuthResponse> {
+  // First validate the data
+  LoginDTO.parse(data);
+
   try {
     const user = await getUserByEmail(data.email);
 
@@ -172,7 +154,10 @@ async function login(data: LoginData): Promise<AuthResponse> {
   }
 }
 
-async function forgotPassword(data: forgotPasswordData): Promise<void> {
+async function forgotPassword(data: ForgotPasswordData): Promise<void> {
+  // First validate the data
+  ForgotPasswordDTO.parse(data);
+
   const user = await getUserByEmail(data.email);
 
   if (!user) {
@@ -189,7 +174,10 @@ async function forgotPassword(data: forgotPasswordData): Promise<void> {
   await sendPasswordResetEmail(data.email, resetLink);
 }
 
-async function resetPassword(data: resetPasswordData): Promise<void> {
+async function resetPassword(data: ResetPasswordData): Promise<void> {
+  // First validate the data
+  ResetPasswordDTO.parse(data);
+
   const user = await getFirstUserMatchByFilter(data.token);
 
   if (!user) {

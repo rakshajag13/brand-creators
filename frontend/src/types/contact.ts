@@ -19,14 +19,26 @@ export interface ContactData {
 export interface ContactResponse {
   user: Omit<User, "password">;
 }
+
 export interface AllContactResponse {
   contacts: ContactData[];
   pagination: Pagination;
 }
 
+export interface Contact {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  clientId: number;
+}
+
 export interface Pagination {
-  currentPage: number;
-  pageSize: number;
   totalContacts: number;
+  pageSize: number;
+  currentPage: number;
   totalPages: number;
 }
