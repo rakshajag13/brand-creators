@@ -17,6 +17,7 @@ import { ResetPassword } from "./ResetPassword";
 import { ForgotPassword } from "./ForgotPassword";
 import { ContactProvider } from "context/ContactContext";
 import { BrandSignup } from "./brandSignup";
+import { Settings } from "./Settings";
 
 const App = () => {
   const { isLoggedIn } = useAuth();
@@ -50,6 +51,7 @@ const App = () => {
         path: "/login",
         element: <Login />,
       },
+
     ],
     protected: [
       {
@@ -64,6 +66,10 @@ const App = () => {
         path: "/payments",
         element: <PaymentComponent />,
       },
+      {
+        path: "/settings",
+        element: <Settings />
+      }
     ],
   };
 
