@@ -1,24 +1,28 @@
 import React from "react";
 import { Button, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import ShopIcon from '@mui/icons-material/Shop';
-
-
+import CreateShopifyModal from "./CreateShopifyModal";
 
 const Integrations = () => {
     const [isConnected, setIsConnected] = React.useState(false);
-    const storeName = "test";
+    const [openShoifyModal, setShopifyModal] = React.useState(false);
+    const [storeName, setStoreName] = React.useState("");
+
     const connectShopify = () => {
-        setIsConnected(true);
+        setShopifyModal(true);
     };
     const disconnectShopify = () => {
         setIsConnected(false);
     };
 
+    const onShopifyConnection = ({ storeName, status }: { storeName: string, status: string }) => {
+        setStoreName(storeName);
+        setIsConnected(true);
+    }
     return (<Card style={{
         width: "30%", height: "250px"
     }}>
         < CardContent >
-            <Typography variant="h6">Shopify Integration</Typography>
             {!isConnected ? (
                 <Button
                     style={{ color: "white", backgroundColor: "black" }}
@@ -38,6 +42,10 @@ const Integrations = () => {
                 </Stack>
             )}
         </CardContent >
+        <CreateShopifyModal
+            open={openShoifyModal}
+            onClose={() => setShopifyModal(false)}
+            onShopifyConnection={onShopifyConnection} />
     </Card >)
 
 }

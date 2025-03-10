@@ -17,7 +17,7 @@ export const Settings = () => {
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         {
-                            tabNames.map((tabName) => <Tab label={tabName} />)
+                            tabNames.map((tabName) => <Tab label={tabName} key={tabName} />)
                         }
                     </Tabs>
                 </Box>
