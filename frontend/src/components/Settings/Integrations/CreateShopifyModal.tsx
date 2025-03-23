@@ -13,16 +13,32 @@ import { ShopifyData } from 'types/shopify';
 interface CreateShopifyModalProps {
     open: boolean;
     onClose: () => void;
-    onShopifyConnection: ({ storeName, status }: { storeName: string, status: string }) => void;
 }
 
-const CreateShoifyModal = ({ open, onClose, onShopifyConnection }: CreateShopifyModalProps) => {
-    const handleOnSubmit = (data: ShopifyData) => {
+const CreateShoifyModal = ({ open, onClose }: CreateShopifyModalProps) => {
+    const handleOnSubmit = async (data: ShopifyData) => {
         console.log(data);
-        onShopifyConnection({ storeName: data.storeName, status: "connected" });
-        onClose();
-        reset();
+
+        const input = {
+            storeName: data.storeName,
+            storeUrl: data.storeShopifyUrl,
+            clientId: 17,
+        };
+        const res = await fetch("http://localhost:4000/api/shop", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(input),
+        });
+        if (res.status === 201) {
+            //onShopifyConnection({ storeName: data.storeName, status: "connected" });
+            onClose();
+            reset();
+        }
+
     };
+
     const {
         control,
         handleSubmit,
@@ -33,7 +49,6 @@ const CreateShoifyModal = ({ open, onClose, onShopifyConnection }: CreateShopify
         mode: "onSubmit",
         defaultValues: {
             storeName: "",
-            storePublicUrl: "",
             storeShopifyUrl: ""
         },
     });
@@ -62,22 +77,7 @@ const CreateShoifyModal = ({ open, onClose, onShopifyConnection }: CreateShopify
                             />
                         )}
                     />
-                    <Controller
-                        name='storePublicUrl'
-                        control={control}
-                        render={({ field }) => (
-                            <TextField
-                                {...field}
-                                autoFocus
-                                placeholder='https://www.test.com'
-                                label="Public Url"
-                                fullWidth
-                                variant="standard"
-                                error={!!errors.storePublicUrl}
-                                helperText={errors.storePublicUrl?.message}
-                            />
-                        )}
-                    />
+
                     <Controller
                         name='storeShopifyUrl'
                         control={control}

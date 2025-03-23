@@ -71,8 +71,22 @@ model Client {
   billingDetails BillingDetail[]
   creators       Creator[]
   ClientDomain   ClientDomain[]
+  Shops          Shops[]         @relation("ClientUsers")
 
   @@map("clients")
+}
+
+model Shops {
+  id          Int      @id @default(autoincrement())
+  storeName   String
+  storeUrl    String
+  apiKey      String
+  apiSecret   String
+  accessToken String
+  client      Client?  @relation("ClientUsers", fields: [clientId], references: [id])
+  clientId    Int?
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @default(now())
 }
 
 model ClientDomain {
