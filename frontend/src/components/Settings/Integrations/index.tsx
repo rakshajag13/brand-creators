@@ -1,116 +1,150 @@
 import React, { useEffect } from "react";
-import { Box, Button, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
-import ShopIcon from '@mui/icons-material/Shop';
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Stack,
+    Typography,
+} from "@mui/material";
+import ShopIcon from "@mui/icons-material/Shop";
 import CreateShopifyModal from "./CreateShopifyModal";
-import { Shop } from "@mui/icons-material";
 import { ShopsToolbar } from "./ShopsToolbar";
-import { styled } from '@mui/material/styles';
 
-interface Shop { id: number; storeName: string; storeUrl: string; clientId: number; }
+interface Shop {
+    id: number;
+    storeName: string;
+    storeUrl: string;
+    clientId: number;
+    apiKey: string;
+    apiSecret: string;
+    accessToken: string;
+    createdAt: Date;
+    updateAt: Date;
+}
+type ConnectionStatus = "Connected" | "Disconnected" | "InProgress";
 
 const Integrations = () => {
-    const [isConnected, setIsConnected] = React.useState(false);
+    const [isConnected, setIsConnected] =
+        React.useState<ConnectionStatus>("Disconnected");
     const [openShoifyModal, setShopifyModal] = React.useState(false);
     const [shops, setShops] = React.useState<Shop[]>([]);
-
 
     const connectShopify = () => {
         setShopifyModal(true);
     };
-    const disconnectShopify = () => {
-        setIsConnected(false);
+    const disconnectShopify = (shop: Shop) => {
+        deleteShopById(shop.id);
+        setIsConnected("Disconnected");
     };
     const getShops = async () => {
         const res = await fetch("http://localhost:4000/api/shop/17");
         const data = await res.json();
         console.log(data);
         setShops(data);
-    }
+    };
+
+    const deleteShopById = async (shopId: number) => {
+        await fetch(`http://localhost:4000/api/shop/${shopId}`, {
+            method: "DELETE",
+        });
+        getShops();
+    };
+    const setShopStatus = React.useCallback(() => {
+        const [shop] = shops;
+        if (!shop) {
+            setIsConnected("Disconnected");
+            return;
+        }
+        shop.apiKey && shop.apiSecret && shop.accessToken
+            ? setIsConnected("Connected")
+            : setIsConnected("InProgress");
+    }, [shops]);
+
     const onClose = () => {
         getShops();
-        setShopifyModal(false)
-    }
+        setShopifyModal(false);
+    };
     useEffect(() => {
         getShops();
-    }, [])
+    }, []); // Only run once when the component mounts
 
+    useEffect(() => {
+        setShopStatus();
+    }, [shops]); // Runs only when shops change
+
+    const ShopstatusChip = React.memo(() => {
+        if (isConnected === "Connected") {
+            return <Chip label="Connected" color="success" />;
+        } else if (isConnected === "Disconnected") {
+            return <Chip label="Disconnected" color="error" />;
+        } else {
+            return <Chip label="In Progress" color="warning" />;
+        }
+    });
     return (
-        // <Card style={{
-        //     width: "30%", height: "250px"
-        // }}>
-        //     <ShopsToolbar
-        //         onCreateShop={() => setShopifyModal(true)}
-        //     />
-        //     < CardContent >
-        //         {!shops.length ? (
-        //             <Button
-        //                 style={{ color: "white", backgroundColor: "black" }}
-        //                 variant="contained"
-        //                 startIcon={<ShopIcon />}
-        //                 onClick={connectShopify}
-        //             >
-        //                 Connect Shopify Store
-        //             </Button>
-        //         ) : (
-
-        //             shops.map(shop => {
-        //                 return (
-        //                     <Stack direction="row" spacing={2} style={{ width: "100%", display: "flex", gap: "1.5rem", alignItems: "center", justifyContent: "space-between", flexDirection: "column" }}>
-        //                         <Typography>Store: {shop.storeName}</Typography>
-        //                         <Chip label="Connected" color="success" />
-        //                         <Button variant="outlined" onClick={disconnectShopify}>
-        //                             Disconnect
-        //                         </Button>
-        //                     </Stack>
-        //                 );
-        //             })
-
-        //         )}
-        //     </CardContent >
-        //     <CreateShopifyModal
-        //         open={openShoifyModal}
-        //         onClose={onClose} />
-
-        // </Card >
-        <Card sx={{ width: "30%", height: "250px", p: 2 }}>
-            {/* Align ShopsToolbar to the right */}
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <ShopsToolbar onCreateShop={() => setShopifyModal(true)} />
-            </Box>
-
+        <Card sx={{
+            p: 3,
+            m: 2,
+            borderRadius: "12px",
+            boxShadow: 3,
+            backgroundColor: "white",
+            width: "360px",
+        }}>
             <CardContent>
                 {!shops.length ? (
-                    <Button
-                        sx={{ color: "white", backgroundColor: "black" }}
-                        variant="contained"
-                        startIcon={<ShopIcon />}
-                        onClick={connectShopify}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
                     >
-                        Connect Shopify Store
-                    </Button>
-                ) : (
-                    shops.map((shop) => (
-                        <Stack
-                            key={shop.id} // Add a unique key
-                            direction="column"
-                            spacing={2}
-                            sx={{ width: "100%", gap: "1.2rem", alignItems: "center" }}
+                        <Button
+                            sx={{
+                                color: "white",
+                                backgroundColor: "black",
+                                "&:hover": { backgroundColor: "grey.800" }
+                            }}
+                            variant="contained"
+                            startIcon={<ShopIcon />}
+                            onClick={connectShopify}
                         >
-                            <Typography>Store: {shop.storeName}</Typography>
-                            <Chip label="Connected" color="success" />
-                            <Button variant="outlined" onClick={disconnectShopify}>
-                                Disconnect
-                            </Button>
+                            Connect
+                        </Button>
+                    </Box>
+                ) : (
+                    <>
+                        {/* Align ShopsToolbar to the right */}
+                        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+                            <ShopsToolbar onCreateShop={() => setShopifyModal(true)} />
+                        </Box>
+
+                        <Stack spacing={3} alignItems="center">
+                            {shops.map((shop) => (
+                                <Card key={shop.id} sx={{ p: 2, width: "100%", maxWidth: 400, boxShadow: 2 }}>
+                                    <Stack
+                                        direction="column"
+                                        spacing={1.5}
+                                        alignItems="center"
+                                    >
+                                        <Typography>Store: {shop.storeName}</Typography>
+                                        <ShopstatusChip />
+                                        <Button variant="outlined" onClick={() => disconnectShopify(shop)}>
+                                            Disconnect
+                                        </Button>
+                                    </Stack>
+                                </Card>
+                            ))}
                         </Stack>
-                    ))
+                    </>
                 )}
             </CardContent>
-
             <CreateShopifyModal open={openShoifyModal} onClose={onClose} />
         </Card>
 
-    )
-
-}
+    );
+};
 
 export default Integrations;

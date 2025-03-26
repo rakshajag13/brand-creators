@@ -1,7 +1,5 @@
-import { Toolbar, Typography, IconButton, Tooltip } from "@mui/material";
-import { Delete, Edit, Add } from "@mui/icons-material";
-import { alpha } from "@mui/material/styles";
-import { shopSchema } from '../../../../../backend/src/validators/shop.validator';
+import { IconButton, Tooltip } from "@mui/material";
+import { Add } from "@mui/icons-material";
 
 interface ContactsToolbarProps {
     onCreateShop: () => void

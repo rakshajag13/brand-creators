@@ -12,7 +12,6 @@ export const createShopifyStore = async (
       storeUrl: req.body.storeUrl,
       clientId: req.body.clientId,
     });
-    console.log(req.body);
     await shopService.createShopifyStore(data);
     res.status(201).send("shop created successfully");
   } catch (error) {
@@ -44,6 +43,20 @@ export const getAllShopsById = async (req: Request, res: Response) => {
     const shopId = Number(req.params.shopId);
     const result = await shopService.getAllShopsById(shopId);
     res.status(200).json(result);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+};
+
+export const deleteShopById = async (req: Request, res: Response) => {
+  try {
+    const shopId = Number(req.params.shopId);
+    await shopService.deleteShopById(shopId);
+    res.status(201).send("shop deleted successfully");
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });

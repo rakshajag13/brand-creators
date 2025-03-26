@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { shopType } from "src/validators/shop.validator";
+import { shopType } from "../validators/shop.validator";
 
 const prisma = new PrismaClient();
 
@@ -65,8 +65,20 @@ async function getAllShopsById(shopId: number) {
   }
 }
 
+async function deleteShopById(shopId: number) {
+  try {
+    console.log("Deleting shop with ID:", shopId);
+    const shop = await prisma.shops.delete({ where: { id: shopId } });
+    return shop;
+  } catch (error) {
+    console.error("Error deleting shop:", error);
+    throw new Error("Failed to delete shop"); // Re-throw a user-friendly error
+  }
+}
+
 export const shopService = {
   createShopifyStore,
   getAllShops,
   getAllShopsById,
+  deleteShopById,
 };
