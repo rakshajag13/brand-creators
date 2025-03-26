@@ -43,7 +43,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
   const createContact = async (data: ContactData) => {
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:4000/api/contact/contacts", {
+      const res = await fetch("http://localhost:4000/api/contacts/contacts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +85,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
       const res = await fetch(
-        `http://localhost:4000/api/contact/contactsByEmail/${email}`,
+        `http://localhost:4000/api/contacts/contactsByEmail/${email}`,
         {
           method: "GET",
           headers: {
@@ -118,7 +118,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = localStorage.getItem("token");
       try {
         const res = await fetch(
-          `http://localhost:4000/api/contact/contacts?page=${page}&pageSize=${pageSize}`,
+          `http://localhost:4000/api/contacts/contacts?page=${page}&pageSize=${pageSize}`,
           {
             method: "GET",
             headers: {
@@ -146,7 +146,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
       const res = await fetch(
-        `http://localhost:4000/api/contact/contacts/search?q=${encodeURIComponent(
+        `http://localhost:4000/api/contacts/contacts/search?q=${encodeURIComponent(
           query
         )}`,
         {

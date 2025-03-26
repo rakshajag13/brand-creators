@@ -37,6 +37,8 @@ model User {
   invitations      Invitation[]  @relation("Invitations")
   transactions     Transaction[]
   sessions         Session[]
+  groups           Group[]       @relation("UserGroups")
+  UserGroup        UserGroup[]
 
   @@map("users")
 }
@@ -312,4 +314,22 @@ model ReportSettings {
   updatedAt DateTime  @updatedAt
 
   @@map("report_settings")
+}
+
+model Group {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  users     User[]      @relation("UserGroups")
+  UserGroup UserGroup[]
+}
+
+model UserGroup {
+  id      Int @id @default(autoincrement())
+  userId  Int
+  groupId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId]) // Ensure unique user-group assignments
 }

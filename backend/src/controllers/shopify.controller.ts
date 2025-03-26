@@ -25,7 +25,6 @@ export const createShopifyStore = async (
 
 export const getAllShops = async (req: Request, res: Response) => {
   try {
-    console.log(req.params);
     const clientId = Number(req.params.clientId);
     const result = await shopService.getAllShops(clientId);
     res.status(200).json(result);

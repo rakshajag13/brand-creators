@@ -39,14 +39,14 @@ const Integrations = () => {
         setIsConnected("Disconnected");
     };
     const getShops = async () => {
-        const res = await fetch("http://localhost:4000/api/shop/17");
+        const res = await fetch("http://localhost:4000/api/shops/17");
         const data = await res.json();
         console.log(data);
         setShops(data);
     };
 
     const deleteShopById = async (shopId: number) => {
-        await fetch(`http://localhost:4000/api/shop/${shopId}`, {
+        await fetch(`http://localhost:4000/api/shops/${shopId}`, {
             method: "DELETE",
         });
         getShops();
