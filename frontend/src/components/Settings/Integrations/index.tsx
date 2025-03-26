@@ -72,7 +72,7 @@ const Integrations = () => {
 
     useEffect(() => {
         setShopStatus();
-    }, [shops]); // Runs only when shops change
+    }, [shops, setShopStatus]); // Runs only when shops or setShopStatus change
 
     const ShopstatusChip = React.memo(() => {
         if (isConnected === "Connected") {
