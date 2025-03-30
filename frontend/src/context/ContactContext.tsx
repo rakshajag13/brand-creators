@@ -5,6 +5,7 @@ import {
   ContactData,
   ContactResponse,
   AllContactResponse,
+  Contact,
 } from "../types/contact";
 
 type GetContactsParams = {
@@ -20,7 +21,7 @@ interface ContactContextType {
   getContactByEmail: (email: string) => Promise<User | null>;
   getAllContacts: (params: GetContactsParams) => Promise<AllContactResponse>;
   searchContacts: (query: string) => Promise<User[]>;
-  // updateContact: (id: string, data: Partial<User>) => Promise<void>;
+  updateContact: (id: number, data: Contact) => Promise<void>;
   // deleteContact: (id: string) => Promise<void>;
 }
 
@@ -171,29 +172,29 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // const updateContact = async (id: string, data: Partial<User>) => {
-  //     try {
-  //         setIsLoading(true);
-  //         const res = await fetch(`http://localhost:4000/api/contacts/${id}`, {
-  //             method: "PATCH",
-  //             headers: {
-  //                 "Content-Type": "application/json",
-  //                 // Add authorization token if needed
-  //                 // "Authorization": `Bearer ${token}`
-  //             },
-  //             body: JSON.stringify(data)
-  //         });
+  const updateContact = async (id: number, data: Contact) => {
+    // try {
+    //     setIsLoading(true);
+    //     const res = await fetch(`http://localhost:4000/api/contacts/${id}`, {
+    //         method: "PATCH",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             // Add authorization token if needed
+    //             // "Authorization": `Bearer ${token}`
+    //         },
+    //         body: JSON.stringify(data)
+    //     });
 
-  //         if (!res.ok) {
-  //             throw new Error("Failed to update contact");
-  //         }
-  //     } catch (error) {
-  //         console.error("Update contact error:", error);
-  //         throw error;
-  //     } finally {
-  //         setIsLoading(false);
-  //     }
-  // };
+    //     if (!res.ok) {
+    //         throw new Error("Failed to update contact");
+    //     }
+    // } catch (error) {
+    //     console.error("Update contact error:", error);
+    //     throw error;
+    // } finally {
+    //     setIsLoading(false);
+    // }
+  };
 
   // const deleteContact = async (id: string) => {
   //     try {
@@ -227,7 +228,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
         getContactByEmail,
         getAllContacts,
         searchContacts,
-        // updateContact,
+        updateContact,
         // deleteContact
       }}
     >

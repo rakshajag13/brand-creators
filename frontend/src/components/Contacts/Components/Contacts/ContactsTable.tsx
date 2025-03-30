@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Contact } from "types/contact";
-import { TABLE_HEADERS } from "./constants";
+import { TABLE_HEADERS } from "../../constants";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 500,
@@ -32,9 +32,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 interface ContactsTableProps {
   contacts: Contact[];
-  selected: string[];
+  selected: number[];
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSelectClick: (id: string) => void;
+  onSelectClick: (id: number) => void;
 }
 
 export const ContactsTable = ({
@@ -66,7 +66,7 @@ export const ContactsTable = ({
         </TableHead>
         <TableBody>
           {contacts.map((contact) => {
-            const isSelected = selected.indexOf(contact.id.toString()) !== -1;
+            const isSelected = selected.indexOf(contact.id) !== -1;
             return (
               <TableRow
                 hover
@@ -79,7 +79,7 @@ export const ContactsTable = ({
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={isSelected}
-                    onClick={() => onSelectClick(contact.id.toString())}
+                    onClick={() => onSelectClick(contact.id)}
                   />
                 </TableCell>
                 <StyledTableCell>{`${contact.firstName} ${contact.lastName}`}</StyledTableCell>
@@ -87,6 +87,7 @@ export const ContactsTable = ({
                 <StyledTableCell>{contact.phone}</StyledTableCell>
                 <StyledTableCell>{contact.role}</StyledTableCell>
                 <StyledTableCell>{contact.status}</StyledTableCell>
+                {/* <StyledTableCell>{contact.group}</StyledTableCell> */}
               </TableRow>
             );
           })}

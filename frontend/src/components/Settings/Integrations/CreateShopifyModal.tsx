@@ -24,7 +24,7 @@ const CreateShoifyModal = ({ open, onClose }: CreateShopifyModalProps) => {
             storeUrl: data.storeShopifyUrl,
             clientId: 17,
         };
-        const res = await fetch("http://localhost:4000/api/shop", {
+        const res = await fetch("http://localhost:4000/api/shops", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
