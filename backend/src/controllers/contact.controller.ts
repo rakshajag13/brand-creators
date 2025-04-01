@@ -35,7 +35,6 @@ export async function GetContactByEmail(req: Request, res: Response) {
 
 export async function GetAllContacts(req: Request, res: Response) {
   try {
-    console.log("req.query", req);
     const { page, pageSize, search, sortBy, sortOrder } = req.query;
     // Extracting user information from the request
     // Assuming you have a middleware that adds user info to the request
@@ -44,7 +43,6 @@ export async function GetAllContacts(req: Request, res: Response) {
     // If you're using a different authentication method, adjust accordingly
     // const user = req.user;
     const { user } = req as any;
-    console.log("user---contacts", user);
     // Check if user is authenticated and has clientId
     if (!user || !user.clientId) {
       res

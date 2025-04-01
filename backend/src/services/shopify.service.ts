@@ -67,7 +67,6 @@ async function getAllShopsById(shopId: number) {
 
 async function deleteShopById(shopId: number) {
   try {
-    console.log("Deleting shop with ID:", shopId);
     const shop = await prisma.shops.delete({ where: { id: shopId } });
     return shop;
   } catch (error) {

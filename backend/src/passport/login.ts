@@ -20,7 +20,6 @@ const localLoginStategy = new LocalStrategy(
   async (_, email, password, done) => {
     try {
       const user = await getUserByEmail(email);
-      console.log("login_stategy", user);
       if (!user) {
         return done(null, false, { message: "Invalid credentials" });
       }
@@ -40,7 +39,6 @@ const localLoginStategy = new LocalStrategy(
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       });
 
-      //console.log(userWithoutPassword);
       return done(null, userWithoutPassword);
     } catch (error) {
       console.log(error);
@@ -51,7 +49,6 @@ const localLoginStategy = new LocalStrategy(
 
 // Serialize and Deserialize User
 passport.serializeUser((user: any, done) => {
-  console.log("serializeUser", user.id);
   done(null, user.id);
 });
 

@@ -41,7 +41,6 @@ const Integrations = () => {
     const getShops = async () => {
         const res = await fetch("http://localhost:4000/api/shops/17");
         const data = await res.json();
-        console.log(data);
         setShops(data);
     };
 

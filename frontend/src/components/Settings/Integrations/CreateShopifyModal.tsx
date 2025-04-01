@@ -17,7 +17,6 @@ interface CreateShopifyModalProps {
 
 const CreateShoifyModal = ({ open, onClose }: CreateShopifyModalProps) => {
     const handleOnSubmit = async (data: ShopifyData) => {
-        console.log(data);
 
         const input = {
             storeName: data.storeName,
