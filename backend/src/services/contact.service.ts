@@ -207,12 +207,9 @@ async function updateContact(
   data: Partial<ContactData>
 ): Promise<ContactResponse> {
   try {
-    console.log("Updating contact with ID:", id);
-    // Update the contact
     const updatedContact = await updateContactById(id, {
       ...data,
     });
-    console.log("Updated contact:", updatedContact);
     if (!updatedContact) {
       throw new Error("Contact not found");
     }
