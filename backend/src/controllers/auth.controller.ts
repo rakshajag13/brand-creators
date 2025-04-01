@@ -18,8 +18,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await authService.login(req.body);
-    res.status(200).json(result);
+    return authService.login(req, res, (err: any) => {
+      if (err) {
+        return res.status(401).json({ message: err.message });
+      }
+      return res.status(200).json(req.user);
+    });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });

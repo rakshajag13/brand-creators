@@ -2,6 +2,7 @@ import { Router } from "express";
 import { contactController } from "../controllers/contact.controller";
 import { contactSchema } from "../validators/contact.validator";
 import { validate } from "../middleware/validate";
+
 const router = Router();
 
 router.post(
@@ -16,6 +17,7 @@ router.get("/contacts", contactController.GetAllContacts);
 router.get("/contacts/search", contactController.SearchContacts);
 
 router.patch("/contacts/:id", contactController.UpdateContact);
-//router.delete("/contacts/:id", contactController.DeleteContact);
+
+router.delete("/contacts", contactController.DeleteContact);
 
 export default router;

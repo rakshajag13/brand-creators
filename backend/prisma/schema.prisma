@@ -39,6 +39,7 @@ model User {
   sessions         Session[]
   groups           Group[]       @relation("UserGroups")
   UserGroup        UserGroup[]
+  ClientUser       ClientUser[]
 
   @@map("users")
 }
@@ -54,6 +55,23 @@ enum UserRole {
   ADMIN
   CLIENT
   CREATOR
+}
+
+model ClientUser {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  clientId  Int
+  role      UserRole   @default(CREATOR)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@unique([userId, clientId]) // Ensure unique user-client assignments
+  @@map("client_users")
 }
 
 // Client Management
@@ -74,6 +92,7 @@ model Client {
   creators       Creator[]
   ClientDomain   ClientDomain[]
   Shops          Shops[]         @relation("ClientUsers")
+  ClientUser     ClientUser[]
 
   @@map("clients")
 }

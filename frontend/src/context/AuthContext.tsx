@@ -31,6 +31,7 @@ const authService = {
   async makeRequest<T>(endpoint: string, data: unknown): Promise<T> {
     const response = await fetch(endpoint, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });

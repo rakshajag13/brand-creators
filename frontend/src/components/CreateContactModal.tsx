@@ -208,7 +208,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                   error={!!errors.role}
                   helperText={errors.role?.message}
                 >
-                  {["ADMIN", "CLIENT", "CREATOR"].map((role) => (
+                  {["ADMIN", "CREATOR"].map((role) => (
                     <MenuItem key={role} value={role}>
                       {role.charAt(0) + role.slice(1).toLowerCase()}
                     </MenuItem>

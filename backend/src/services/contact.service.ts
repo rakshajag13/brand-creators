@@ -7,12 +7,13 @@ import {
 } from "@prisma/client";
 import {
   createUser,
-  createClient,
+  createClientUser,
   createUserByCreatorRole,
   getUserByEmail,
   totalUsersCount,
   getAllUsersContacts,
   updateContactById,
+  deleteContact,
 } from "../repositories/userRepository";
 
 //const prisma = new PrismaClient();
@@ -25,14 +26,17 @@ interface ContactData {
   phone?: string;
   role: UserRole;
   status?: UserStatus;
+  clientId?: number;
 }
-
+export type SortBy = "firstName" | "lastName" | "email" | "createdAt";
+export type SortOrder = "asc" | "desc";
 export interface ContactQueryParams {
   page?: number;
   pageSize?: number;
   search?: string;
-  sortBy?: "firstName" | "lastName" | "email" | "createdAt";
-  sortOrder?: "asc" | "desc";
+  sortBy?: SortBy;
+  sortOrder?: SortOrder;
+  clientId?: number;
 }
 
 interface ContactResponse {
@@ -53,15 +57,12 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
       resetToken: "",
     });
 
-    // If role is CLIENT, create a client record
-    if (data.role === "CLIENT") {
-      await createClient({
-        companyName: "",
-        industry: "",
-        businessType: "",
-        users: { connect: { id: user.id } },
-      });
-    }
+    await createClientUser({
+      userId: user.id,
+      clientId: data.clientId,
+      role: user.role,
+      status: UserStatus.ACTIVE,
+    });
 
     // If role is CREATOR, create a creator record
     if (data.role === "CREATOR") {
@@ -91,7 +92,10 @@ async function getContactByEmail(email: string) {
   }
 }
 
-async function getAllContacts(params: ContactQueryParams = {}) {
+async function getAllContacts(
+  clientId: number,
+  params: ContactQueryParams = {}
+) {
   try {
     const {
       page = 1,
@@ -101,17 +105,26 @@ async function getAllContacts(params: ContactQueryParams = {}) {
       sortOrder = "desc",
     } = params;
 
+    if (!clientId) {
+      throw new Error("Client ID is required");
+    }
+
     // Build dynamic search condition
-    const searchCondition: Prisma.UserWhereInput = search
-      ? {
-          OR: [
-            { firstName: { contains: search, mode: "insensitive" } },
-            { lastName: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } },
-            { phone: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : {};
+    const searchCondition: Prisma.ClientUserWhereInput = {
+      clientId,
+      ...(search
+        ? {
+            OR: [
+              {
+                user: { firstName: { contains: search, mode: "insensitive" } },
+              },
+              { user: { lastName: { contains: search, mode: "insensitive" } } },
+              { user: { email: { contains: search, mode: "insensitive" } } },
+              { user: { phone: { contains: search, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    };
 
     // Pagination calculation
     const skip = (page - 1) * pageSize;
@@ -131,16 +144,17 @@ async function getAllContacts(params: ContactQueryParams = {}) {
           status: true,
           createdAt: true,
         },
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: [{ [sortBy]: sortOrder }],
         skip,
         take: pageSize,
       }),
-      //prisma.user.count({ where: searchCondition }),
-      // prisma.user.findMany(),
     ]);
 
+    // Map the contacts to extract user details
+    const formattedContacts = contacts.map((contact) => contact);
+
     return {
-      contacts,
+      contacts: formattedContacts,
       pagination: {
         totalContacts,
         currentPage: page,
@@ -149,7 +163,7 @@ async function getAllContacts(params: ContactQueryParams = {}) {
       },
     };
   } catch (error) {
-    console.error("Error fetching contacts:", error);
+    console.error("Error fetching contacts by client ID:", error);
     throw error;
   }
 }
@@ -220,11 +234,32 @@ async function updateContact(
     throw error;
   }
 }
+
+async function deleteContacts(
+  ids: number[]
+): Promise<{ deletedCount: number }> {
+  try {
+    const deletedCount = await Promise.all(
+      ids.map(async (id) => {
+        const deletedContact = await deleteContact(id);
+        if (!deletedContact) {
+          throw new Error(`Contact with ID ${id} not found`);
+        }
+        return deletedContact;
+      })
+    );
+
+    return { deletedCount: deletedCount.length };
+  } catch (error) {
+    console.error("Error deleting contacts:", error);
+    throw error;
+  }
+}
 export const contactService = {
   createContact,
   getContactByEmail,
   getAllContacts,
   searchContacts,
   updateContact,
-  // deleteContact,
+  deleteContacts,
 };

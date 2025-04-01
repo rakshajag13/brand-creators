@@ -112,28 +112,27 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getAllContacts = useCallback(
-    async ({
-      page,
-      pageSize,
-    }: GetContactsParams): Promise<AllContactResponse> => {
-      const token = localStorage.getItem("token");
+    async (params: GetContactsParams): Promise<AllContactResponse> => {
+      const { page, pageSize } = params;
+
       try {
         const res = await fetch(
           `http://localhost:4000/api/contacts/contacts?page=${page}&pageSize=${pageSize}`,
           {
             method: "GET",
+            credentials: "include",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
             },
           }
         );
 
         if (!res.ok) {
-          throw new Error("Failed to fetch contacts");
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to fetch contacts");
         }
 
-        return await res.json();
+        return res.json();
       } catch (error) {
         console.error("Get all contacts error:", error);
         throw error;

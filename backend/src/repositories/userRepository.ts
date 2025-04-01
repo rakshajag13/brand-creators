@@ -11,6 +11,12 @@ export const getUserByEmail = async (email: string) => {
   });
 };
 
+export const getUserById = async (id: number) => {
+  return prisma.user.findUnique({
+    where: { id },
+  });
+};
+
 export const createUser = async (data: any) => {
   return prisma.user.create({
     data,
@@ -19,6 +25,12 @@ export const createUser = async (data: any) => {
 
 export const createClient = async (data: any) => {
   return prisma.client.create(data);
+};
+
+export const createClientUser = async (data: any) => {
+  return prisma.clientUser.create({
+    data,
+  });
 };
 
 export const createSession = async (data: any) => {
@@ -47,9 +59,9 @@ export const getFirstUserMatchByFilter = async (resetToken: string) => {
 };
 
 export const totalUsersCount = async (
-  searchCondition: Prisma.UserWhereInput
+  searchCondition: Prisma.ClientUserWhereInput
 ) => {
-  return prisma.user.count({
+  return prisma.clientUser.count({
     where: searchCondition,
   });
 };
@@ -61,7 +73,22 @@ export const updateContactById = async (id: number, data: any) => {
   });
 };
 export const deleteContact = async (id: number) => {
-  return prisma.user.delete({
-    where: { id },
-  });
+  return await prisma.$transaction([
+    prisma.creator.deleteMany({
+      where: { userId: id },
+    }),
+    prisma.userGroup.deleteMany({
+      where: { userId: id },
+    }),
+    prisma.clientUser.deleteMany({
+      where: { userId: id },
+    }),
+    prisma.session.deleteMany({
+      where: { userId: id },
+    }),
+
+    prisma.user.delete({
+      where: { id },
+    }),
+  ]);
 };
