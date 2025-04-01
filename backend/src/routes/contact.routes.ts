@@ -15,4 +15,7 @@ router.get("/contacts", contactController.GetAllContacts);
 
 router.get("/contacts/search", contactController.SearchContacts);
 
+router.patch("/contacts/:id", contactController.UpdateContact);
+//router.delete("/contacts/:id", contactController.DeleteContact);
+
 export default router;

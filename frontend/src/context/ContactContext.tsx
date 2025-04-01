@@ -173,27 +173,27 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const updateContact = async (id: number, data: Contact) => {
-    // try {
-    //     setIsLoading(true);
-    //     const res = await fetch(`http://localhost:4000/api/contacts/${id}`, {
-    //         method: "PATCH",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             // Add authorization token if needed
-    //             // "Authorization": `Bearer ${token}`
-    //         },
-    //         body: JSON.stringify(data)
-    //     });
+    try {
+      setIsLoading(true);
+      const res = await fetch(`http://localhost:4000/api/contacts/contacts/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authorization token if needed
+          // "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
 
-    //     if (!res.ok) {
-    //         throw new Error("Failed to update contact");
-    //     }
-    // } catch (error) {
-    //     console.error("Update contact error:", error);
-    //     throw error;
-    // } finally {
-    //     setIsLoading(false);
-    // }
+      if (!res.ok) {
+        throw new Error("Failed to update contact");
+      }
+    } catch (error) {
+      console.error("Update contact error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // const deleteContact = async (id: string) => {

@@ -12,6 +12,7 @@ import {
   getUserByEmail,
   totalUsersCount,
   getAllUsersContacts,
+  updateContactById,
 } from "../repositories/userRepository";
 
 //const prisma = new PrismaClient();
@@ -201,9 +202,32 @@ async function searchContacts(filters: {
   }
 }
 
+async function updateContact(
+  id: number,
+  data: Partial<ContactData>
+): Promise<ContactResponse> {
+  try {
+    console.log("Updating contact with ID:", id);
+    // Update the contact
+    const updatedContact = await updateContactById(id, {
+      ...data,
+    });
+    console.log("Updated contact:", updatedContact);
+    if (!updatedContact) {
+      throw new Error("Contact not found");
+    }
+
+    return { contact: updatedContact };
+  } catch (error) {
+    console.error("Error updating contact:", error);
+    throw error;
+  }
+}
 export const contactService = {
   createContact,
   getContactByEmail,
   getAllContacts,
   searchContacts,
+  updateContact,
+  // deleteContact,
 };

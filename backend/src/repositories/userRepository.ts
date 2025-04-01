@@ -53,3 +53,15 @@ export const totalUsersCount = async (
     where: searchCondition,
   });
 };
+
+export const updateContactById = async (id: number, data: any) => {
+  return await prisma.user.update({
+    where: { id },
+    data,
+  });
+};
+export const deleteContact = async (id: number) => {
+  return prisma.user.delete({
+    where: { id },
+  });
+};

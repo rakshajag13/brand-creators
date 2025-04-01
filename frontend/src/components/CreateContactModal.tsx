@@ -78,7 +78,8 @@ const FormField: React.FC<{
   control: Control<ContactData>;
   error?: FieldError;
   placeholder?: string;
-}> = ({ name, label, control, error, placeholder }) => (
+  disabled?: boolean;
+}> = ({ name, label, control, error, placeholder, disabled }) => (
   <Controller
     name={name}
     control={control}
@@ -91,6 +92,7 @@ const FormField: React.FC<{
         error={!!error}
         helperText={error?.message}
         placeholder={placeholder}
+        disabled={disabled}
       />
     )}
   />
@@ -190,6 +192,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                 label={label}
                 control={control}
                 error={errors[name]}
+                disabled={name === "email" && editMode}
               />
             ))}
             <Controller
