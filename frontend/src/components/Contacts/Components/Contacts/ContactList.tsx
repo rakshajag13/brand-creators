@@ -6,10 +6,10 @@ import { CreateContactModal } from "components/CreateContactModal";
 import { useContact } from "context/ContactContext";
 import { Contact, Pagination } from "types/contact";
 import { DEFAULT_PAGINATION } from "../../constants";
-import { set } from "react-hook-form";
+
 
 const ContactList = () => {
-    const { getAllContacts } = useContact();
+    const { getAllContacts, deleteContacts } = useContact();
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [selected, setSelected] = useState<number[]>([]);
     const [pagination, setPagination] = useState<Pagination>(DEFAULT_PAGINATION);
@@ -115,6 +115,17 @@ const ContactList = () => {
 
     }, [contacts, selected]);
 
+    const handleDeleteContact = useCallback(async () => {
+        if (selected.length === 0) return;
+
+        try {
+            await deleteContacts(selected);
+            setSelected([]);
+            fetchContacts(pagination.currentPage, pagination.pageSize);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "An unexpected error occurred");
+        }
+    }, [selected, deleteContacts, fetchContacts, pagination.currentPage, pagination.pageSize]);
 
     if (error) {
         return (
@@ -142,6 +153,7 @@ const ContactList = () => {
         <><ContactsToolbar
             userIds={selected}
             onEditContact={handleEditContact}
+            onDeleteContact={handleDeleteContact}
             onCreateContact={() => {
                 setEditMode(false);
                 setContactRecord(undefined);

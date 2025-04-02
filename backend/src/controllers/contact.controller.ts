@@ -8,7 +8,18 @@ import {
 
 export async function CreateContact(req: Request, res: Response) {
   try {
-    const contact = await contactService.createContact(req.body);
+    const { user } = req as any;
+    if (!user || !user.clientId) {
+      res
+        .status(401)
+        .json({ error: "Unauthorized: User not found or clientId is missing" });
+      return;
+    }
+    const input = {
+      ...req.body,
+      clientId: user.clientId,
+    };
+    const contact = await contactService.createContact(input);
     res.status(201).json(contact);
   } catch (error) {
     if (error instanceof Error) {

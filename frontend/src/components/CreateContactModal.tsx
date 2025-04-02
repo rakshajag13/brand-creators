@@ -151,11 +151,11 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
           return;
         }
       } else {
-        await updateContact(input?.id || 0, data);
-        // if (error) {
-        //   setErrorMessage(error);
-        //   return;
-        // }
+        const { error } = await updateContact(input?.id || 0, data);
+        if (error) {
+          setErrorMessage(error);
+          return;
+        }
       }
 
       navigate("/Home");

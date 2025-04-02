@@ -14,6 +14,7 @@ import {
   getAllUsersContacts,
   updateContactById,
   deleteContact,
+  getUserByClientId,
 } from "../repositories/userRepository";
 
 //const prisma = new PrismaClient();
@@ -26,7 +27,7 @@ interface ContactData {
   phone?: string;
   role: UserRole;
   status?: UserStatus;
-  clientId?: number;
+  clientId: number;
 }
 export type SortBy = "firstName" | "lastName" | "email" | "createdAt";
 export type SortOrder = "asc" | "desc";
@@ -48,9 +49,30 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
     const existingUser = await getUserByEmail(data.email);
 
     if (existingUser) {
-      throw new Error("Email already registered");
+      const existUserInClientUser = await getUserByClientId(data.clientId);
+
+      // Check if the user already exists in the client-user mapping
+      if (
+        Array.isArray(existUserInClientUser) &&
+        existUserInClientUser.some(
+          (clientUser) => clientUser.userId === existingUser.id
+        )
+      ) {
+        throw new Error("User already exists for the given client ID");
+      }
+
+      // Map the existing user to the new client ID
+      await createClientUser({
+        userId: existingUser.id,
+        clientId: data.clientId,
+        role: data.role,
+        status: UserStatus.ACTIVE,
+      });
+
+      return { contact: existingUser };
     }
 
+    // Create a new user if no existing user is found
     const user = await createUser({
       ...data,
       password: "",
@@ -74,6 +96,7 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
 
     return { contact: user };
   } catch (error) {
+    console.error("Error creating contact:", error);
     throw error;
   }
 }

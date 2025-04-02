@@ -21,8 +21,8 @@ interface ContactContextType {
   getContactByEmail: (email: string) => Promise<User | null>;
   getAllContacts: (params: GetContactsParams) => Promise<AllContactResponse>;
   searchContacts: (query: string) => Promise<User[]>;
-  updateContact: (id: number, data: Contact) => Promise<void>;
-  // deleteContact: (id: string) => Promise<void>;
+  updateContact: (id: number, data: Contact) => Promise<{ data: User | null; error: string | null }>;
+  deleteContacts: (id: number[]) => Promise<void>;
 }
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
@@ -46,8 +46,10 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(true);
       const res = await fetch("http://localhost:4000/api/contacts/contacts", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+
           // Add authorization token if needed
           // "Authorization": `Bearer ${token}`
         },
@@ -171,7 +173,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const updateContact = async (id: number, data: Contact) => {
+  const updateContact = useCallback(async (id: number, data: Contact) => {
     try {
       setIsLoading(true);
       const res = await fetch(`http://localhost:4000/api/contacts/contacts/${id}`, {
@@ -181,42 +183,54 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
           // Add authorization token if needed
           // "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update contact");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to update contact");
       }
+      const contactResponse: ContactResponse = await res.json();
+      setUser(contactResponse.user);
+
+      return {
+        data: contactResponse.user,
+        error: null,
+      };
     } catch (error) {
       console.error("Update contact error:", error);
+      return {
+        error: error instanceof Error ? error.message : "Unknown error",
+        data: null,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const deleteContacts = async (ids: number[]) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`http://localhost:4000/api/contacts/contacts`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authorization token if needed
+          // "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete contacts");
+      }
+    } catch (error) {
+      console.error("Delete contacts error:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
-
-  // const deleteContact = async (id: string) => {
-  //     try {
-  //         setIsLoading(true);
-  //         const res = await fetch(`http://localhost:4000/api/contacts/${id}`, {
-  //             method: "DELETE",
-  //             headers: {
-  //                 "Content-Type": "application/json",
-  //                 // Add authorization token if needed
-  //                 // "Authorization": `Bearer ${token}`
-  //             }
-  //         });
-
-  //         if (!res.ok) {
-  //             throw new Error("Failed to delete contact");
-  //         }
-  //     } catch (error) {
-  //         console.error("Delete contact error:", error);
-  //         throw error;
-  //     } finally {
-  //         setIsLoading(false);
-  //     }
-  // };
 
   return (
     <ContactContext.Provider
@@ -228,7 +242,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
         getAllContacts,
         searchContacts,
         updateContact,
-        // deleteContact
+        deleteContacts
       }}
     >
       {children}

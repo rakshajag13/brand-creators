@@ -11,6 +11,12 @@ export const getUserByEmail = async (email: string) => {
   });
 };
 
+export const getUserByClientId = async (clientId: number) => {
+  return prisma.clientUser.findMany({
+    where: { clientId },
+  });
+};
+
 export const getUserById = async (id: number) => {
   return prisma.user.findUnique({
     where: { id },
@@ -26,7 +32,6 @@ export const createUser = async (data: any) => {
 export const createClient = async (data: any) => {
   return prisma.client.create(data);
 };
-
 export const createClientUser = async (data: any) => {
   return prisma.clientUser.create({
     data,
