@@ -189,7 +189,7 @@ async function getAllContacts(
     ]);
     const userIds = contacts.map((contact) => contact.id);
     const userGroups = await getUserGroups(clientId, userIds);
-    console.log("userGroups:", userGroups);
+
     // Map the contacts to extract user details
     const formattedContacts = contacts.map((contact) => ({
       ...contact,
@@ -197,7 +197,7 @@ async function getAllContacts(
         .filter((group) => group.userId === contact.id)
         .map((gp) => gp.group),
     }));
-    console.log("Formatted Contacts:", formattedContacts);
+
     return {
       contacts: formattedContacts,
       pagination: {

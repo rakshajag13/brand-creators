@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { authService } from "../services/auth.service";
-import { RegisterDTO } from "../dtos/auth.dto";
+import { RegisterDTO, BrandSignupDTO } from "../dtos/auth.dto";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -38,7 +38,8 @@ export const brandSignup = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { clientId } = await authService.brandSignup(req.body);
+    const data = BrandSignupDTO.parse(req.body);
+    const { clientId } = await authService.brandSignup(data);
     res.status(201).json({ clientId });
   } catch (error) {
     if (error instanceof Error) {

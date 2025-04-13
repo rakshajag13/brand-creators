@@ -26,7 +26,7 @@ export const BrandSignupDTO = z.object({
   businessType: z.string().min(1),
   phone: phoneSchema,
   domain: z.string().min(1),
-  status: z.nativeEnum(UserStatus),
+  status: z.nativeEnum(UserStatus).default(UserStatus.ACTIVE),
 });
 
 // Login DTO

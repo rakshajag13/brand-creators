@@ -12,7 +12,6 @@ import {
 } from "../repositories/userRepository";
 import {
   RegisterDTO,
-  BrandSignupDTO,
   ForgotPasswordDTO,
   ResetPasswordDTO,
   type RegisterData,
@@ -64,7 +63,6 @@ async function brandSignup(
   data: BrandSignupData
 ): Promise<{ clientId: number }> {
   // First validate the data
-  BrandSignupDTO.parse(data);
 
   try {
     const existingUser = await getUserByEmail(data.email);
