@@ -193,7 +193,9 @@ async function getAllContacts(
     // Map the contacts to extract user details
     const formattedContacts = contacts.map((contact) => ({
       ...contact,
-      group: userGroups.find((group) => group.userId === contact.id)?.group,
+      groups: userGroups
+        .filter((group) => group.userId === contact.id)
+        .map((gp) => gp.group),
     }));
     console.log("Formatted Contacts:", formattedContacts);
     return {

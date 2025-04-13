@@ -5,10 +5,12 @@ import { GroupTable } from "./GroupTable";
 import { CreateGroupModal } from "components/CreateGroupModal";
 
 import { Group } from "types/contact";
+import { useContact } from "context/ContactContext";
 
 
 
 const GroupList = () => {
+    const { getAllContacts } = useContact();
     const [groups, setGroups] = useState<Group[]>([]);
     const [selected, setSelected] = useState<number[]>([]);
     const [openCreateGroupModal, setOpenCreateGroupModal] = useState(false);
@@ -102,6 +104,7 @@ const GroupList = () => {
 
             setSelected([]);
             fetchGroups();
+            getAllContacts({ page: 1, pageSize: 10 });
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
         }

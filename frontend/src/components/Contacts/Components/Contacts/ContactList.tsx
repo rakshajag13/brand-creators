@@ -4,53 +4,18 @@ import { Paper, TablePagination, Typography } from "@mui/material";
 import { ContactsTable } from "./ContactsTable";
 import { CreateContactModal } from "components/CreateContactModal";
 import { useContact } from "context/ContactContext";
-import { Contact, Pagination } from "types/contact";
-import { DEFAULT_PAGINATION } from "../../constants";
+import { Contact } from "types/contact";
+import { Pagination } from '../../../../types/contact';
 
 
 const ContactList = () => {
-    const { getAllContacts, deleteContacts } = useContact();
-    const [contacts, setContacts] = useState<Contact[]>([]);
+    const { getAllContacts, deleteContacts, contacts, pagination, setPagination } = useContact();
     const [selected, setSelected] = useState<number[]>([]);
-    const [pagination, setPagination] = useState<Pagination>(DEFAULT_PAGINATION);
     const [openCreateContactModal, setOpenCreateContactModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [contactRecord, setContactRecord] = useState<Contact | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
-
-    const fetchContacts = useCallback(
-        async (page: number, pageSize: number) => {
-            try {
-                setLoading(true);
-                setError(null);
-                const data = await getAllContacts({ page, pageSize });
-                setContacts(data.contacts);
-                setPagination((prev) => ({
-                    ...prev,
-                    ...data.pagination,
-                    currentPage: page,
-                }));
-            } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : "An error occurred");
-            } finally {
-                setLoading(false);
-            }
-        },
-        [getAllContacts]
-    );
-
-    const paginationParams = useMemo(
-        () => ({
-            page: pagination.currentPage,
-            pageSize: pagination.pageSize,
-        }),
-        [pagination.currentPage, pagination.pageSize]
-    );
-
-    useEffect(() => {
-        fetchContacts(paginationParams.page, paginationParams.pageSize);
-    }, [fetchContacts, paginationParams]);
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
@@ -102,7 +67,7 @@ const ContactList = () => {
 
     const handleCreateContact = () => {
         setOpenCreateContactModal(false);
-        fetchContacts(pagination.currentPage, pagination.pageSize);
+        //  fetchContacts(pagination.currentPage, pagination.pageSize);
     };
 
     const handleEditContact = React.useCallback(() => {
@@ -121,11 +86,11 @@ const ContactList = () => {
         try {
             await deleteContacts(selected);
             setSelected([]);
-            fetchContacts(pagination.currentPage, pagination.pageSize);
+            getAllContacts({ page: pagination.currentPage, pageSize: pagination.pageSize });
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
         }
-    }, [selected, deleteContacts, fetchContacts, pagination.currentPage, pagination.pageSize]);
+    }, [selected, getAllContacts, pagination, deleteContacts]);
 
     if (error) {
         return (
@@ -175,9 +140,10 @@ const ContactList = () => {
             <CreateContactModal
                 open={openCreateContactModal}
                 onSubmit={handleCreateContact}
-                onClose={() =>
-                    setOpenCreateContactModal(false)
-
+                onClose={() => {
+                    setOpenCreateContactModal(false);
+                    getAllContacts({ page: pagination.currentPage, pageSize: pagination.pageSize })
+                }
                 }
                 input={contactRecord}
                 editMode={editMode} /></>

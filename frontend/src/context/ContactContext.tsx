@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import {
   User,
@@ -6,7 +6,10 @@ import {
   ContactResponse,
   AllContactResponse,
   Contact,
+  Pagination
 } from "../types/contact";
+import { DEFAULT_PAGINATION } from "../components/Contacts/constants";
+
 
 type GetContactsParams = {
   page: number;
@@ -15,14 +18,17 @@ type GetContactsParams = {
 interface ContactContextType {
   user: User | null;
   isLoading: boolean;
+  contacts: Contact[];
+  pagination: Pagination;
   createContact: (
     data: ContactData
   ) => Promise<{ data: User | null; error: string | null }>;
   getContactByEmail: (email: string) => Promise<User | null>;
-  getAllContacts: (params: GetContactsParams) => Promise<AllContactResponse>;
+  getAllContacts: (params: GetContactsParams) => Promise<void>;
   searchContacts: (query: string) => Promise<User[]>;
   updateContact: (id: number, data: Contact) => Promise<{ data: User | null; error: string | null }>;
   deleteContacts: (id: number[]) => Promise<void>;
+  setPagination: React.Dispatch<React.SetStateAction<Pagination>>;
 }
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
@@ -40,6 +46,8 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [pagination, setPagination] = useState<Pagination>(DEFAULT_PAGINATION);
 
   const createContact = async (data: ContactData) => {
     try {
@@ -115,7 +123,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getAllContacts = useCallback(
-    async (params: GetContactsParams): Promise<AllContactResponse> => {
+    async (params: GetContactsParams) => {
       const { page, pageSize } = params;
 
       try {
@@ -134,8 +142,14 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
           const errorData = await res.json();
           throw new Error(errorData.error || "Failed to fetch contacts");
         }
-
-        return res.json();
+        const data = await res.json();
+        console.log("Fetched contacts:", data);
+        setContacts(data.contacts);
+        setPagination((prev) => ({
+          ...prev,
+          ...data.pagination,
+          currentPage: page,
+        }));
       } catch (error) {
         console.error("Get all contacts error:", error);
         throw error;
@@ -236,17 +250,28 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  useEffect(() => {
+    getAllContacts({ page: 1, pageSize: 10 });
+  }, [getAllContacts]);
+
+
+
+
+
   return (
     <ContactContext.Provider
       value={{
         user,
         isLoading,
+        contacts,
+        pagination,
         createContact,
-        getContactByEmail,
         getAllContacts,
+        getContactByEmail,
         searchContacts,
         updateContact,
-        deleteContacts
+        deleteContacts,
+        setPagination
       }}
     >
       {children}

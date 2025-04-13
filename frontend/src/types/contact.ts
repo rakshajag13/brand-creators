@@ -12,10 +12,12 @@ export interface Contact {
   role: "CLIENT" | "CREATOR";
   status: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
   clientId: number;
-  group: {
-    name: string;
-    id: number;
-  };
+  groups: [
+    {
+      name: string;
+      id: number;
+    }
+  ];
 }
 
 export interface ContactData extends Contact {}

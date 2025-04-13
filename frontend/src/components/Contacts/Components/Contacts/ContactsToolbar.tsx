@@ -1,8 +1,9 @@
-import { Toolbar, Typography, IconButton, Tooltip } from "@mui/material";
+import { Toolbar, Typography, IconButton, Tooltip, paginationClasses } from "@mui/material";
 import { Delete, Edit, Add, Group } from "@mui/icons-material";
 import { alpha } from "@mui/material/styles";
 import AssignUsersToGroupModal from "./AssignGroupToUsersModal";
 import React from "react";
+import { useContact } from "context/ContactContext";
 
 interface ContactsToolbarProps {
   userIds: number[];
@@ -75,10 +76,12 @@ export const ContactsToolbar = ({
 }: ContactsToolbarProps) => {
   const [openAssignGroupToUsersModal, setOpenAssignGroupToUsersModal] =
     React.useState(false);
+  const { getAllContacts, pagination } = useContact();
 
   const handleOpenAssignGroupToUsersModal = () => {
     setOpenAssignGroupToUsersModal(true);
   };
+
 
   return (
     <Toolbar
@@ -108,7 +111,10 @@ export const ContactsToolbar = ({
       <AssignUsersToGroupModal
         userIds={userIds}
         open={openAssignGroupToUsersModal}
-        onClose={() => setOpenAssignGroupToUsersModal(false)}
+        onClose={() => {
+          setOpenAssignGroupToUsersModal(false);
+          getAllContacts({ page: pagination.currentPage, pageSize: pagination.pageSize });
+        }}
       />
     </Toolbar>
   );

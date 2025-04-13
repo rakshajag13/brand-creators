@@ -54,7 +54,7 @@ export const ContactsTable = ({
         </TableHead>
         <TableBody>
           {contacts.map((contact) => {
-            console.log(contact);
+            const groups = contact.groups.map((group) => group.name);
             const isSelected = selected.indexOf(contact.id) !== -1;
             return (
               <TableRow
@@ -76,7 +76,7 @@ export const ContactsTable = ({
                 <StyledTableCell>{contact.phone}</StyledTableCell>
                 <StyledTableCell>{contact.role}</StyledTableCell>
                 <StyledTableCell>{contact.status}</StyledTableCell>
-                <StyledTableCell>{contact?.group?.name}</StyledTableCell>
+                <StyledTableCell>{groups?.join(", ")}</StyledTableCell>
               </TableRow>
             );
           })}
