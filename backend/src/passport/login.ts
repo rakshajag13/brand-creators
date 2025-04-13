@@ -55,11 +55,12 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser(async (id: string | number, done) => {
   try {
     const user = await getUserById(Number(id)); // Ensure id is converted to a number if necessary
+    console.log("User found during deserialization:", user);
     if (!user) {
       console.error("User not found during deserialization");
       return done(null, false); // Return false to indicate no user found
     }
-    const { password, ...userWithoutPassword } = user;
+    const { ...userWithoutPassword } = user;
     done(null, userWithoutPassword); // This will be assigned to req.user
   } catch (error) {
     console.error("Error during deserialization:", error);

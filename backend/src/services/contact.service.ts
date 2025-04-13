@@ -13,8 +13,11 @@ import {
   totalUsersCount,
   getAllUsersContacts,
   updateContactById,
-  deleteContact,
   getUserByClientId,
+  getClientUserByUserId,
+  deleteSingleContact,
+  deleteContact,
+  getUserGroups,
 } from "../repositories/userRepository";
 
 //const prisma = new PrismaClient();
@@ -27,7 +30,7 @@ interface ContactData {
   phone?: string;
   role: UserRole;
   status?: UserStatus;
-  clientId: number;
+  clientId?: number;
 }
 export type SortBy = "firstName" | "lastName" | "email" | "createdAt";
 export type SortOrder = "asc" | "desc";
@@ -49,6 +52,9 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
     const existingUser = await getUserByEmail(data.email);
 
     if (existingUser) {
+      if (!data.clientId) {
+        throw new Error("Client ID is required");
+      }
       const existUserInClientUser = await getUserByClientId(data.clientId);
 
       // Check if the user already exists in the client-user mapping
@@ -74,7 +80,12 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
 
     // Create a new user if no existing user is found
     const user = await createUser({
-      ...data,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      role: data.role,
+      status: data.status || UserStatus.ACTIVE,
       password: "",
       resetToken: "",
     });
@@ -133,17 +144,21 @@ async function getAllContacts(
     }
 
     // Build dynamic search condition
-    const searchCondition: Prisma.ClientUserWhereInput = {
-      clientId,
+    const searchCondition: Prisma.UserWhereInput = {
+      ClientUser: {
+        some: {
+          clientId,
+        },
+      },
       ...(search
         ? {
             OR: [
               {
-                user: { firstName: { contains: search, mode: "insensitive" } },
+                firstName: { contains: search, mode: "insensitive" },
               },
-              { user: { lastName: { contains: search, mode: "insensitive" } } },
-              { user: { email: { contains: search, mode: "insensitive" } } },
-              { user: { phone: { contains: search, mode: "insensitive" } } },
+              { lastName: { contains: search, mode: "insensitive" } },
+              { email: { contains: search, mode: "insensitive" } },
+              { phone: { contains: search, mode: "insensitive" } },
             ],
           }
         : {}),
@@ -172,10 +187,15 @@ async function getAllContacts(
         take: pageSize,
       }),
     ]);
-
+    const userIds = contacts.map((contact) => contact.id);
+    const userGroups = await getUserGroups(clientId, userIds);
+    console.log("userGroups:", userGroups);
     // Map the contacts to extract user details
-    const formattedContacts = contacts.map((contact) => contact);
-
+    const formattedContacts = contacts.map((contact) => ({
+      ...contact,
+      group: userGroups.find((group) => group.userId === contact.id)?.group,
+    }));
+    console.log("Formatted Contacts:", formattedContacts);
     return {
       contacts: formattedContacts,
       pagination: {
@@ -259,25 +279,47 @@ async function updateContact(
 }
 
 async function deleteContacts(
-  ids: number[]
+  ids: number[],
+  clientId: number
 ): Promise<{ deletedCount: number }> {
   try {
-    const deletedCount = await Promise.all(
-      ids.map(async (id) => {
-        const deletedContact = await deleteContact(id);
-        if (!deletedContact) {
-          throw new Error(`Contact with ID ${id} not found`);
-        }
-        return deletedContact;
-      })
-    );
+    const deletedCount = await ids.reduce(async (accPromise, id) => {
+      const acc = await accPromise;
+      const clientUsers = await getClientUserByUserId(id);
 
-    return { deletedCount: deletedCount.length };
+      if (!clientUsers || clientUsers.length === 0) {
+        throw new Error(`No client-user mapping found for user ID ${id}`);
+      }
+
+      const clientUser = clientUsers.find((cu) => cu.clientId === clientId);
+      if (!clientUser) {
+        throw new Error(
+          `Client-user mapping not found for user ID ${id} and client ID ${clientId}`
+        );
+      }
+
+      if (clientUsers.length > 1) {
+        // Delete only the client-user mapping
+        const deletedClientUser = await deleteSingleContact(
+          clientUser.userId,
+          clientId
+        );
+
+        return acc + (deletedClientUser ? 1 : 0);
+      } else {
+        // Delete the user entirely
+        const deletedContact = await deleteContact(id);
+        return acc + (deletedContact ? 1 : 0);
+      }
+    }, Promise.resolve(0));
+
+    return { deletedCount };
   } catch (error) {
     console.error("Error deleting contacts:", error);
     throw error;
   }
 }
+
 export const contactService = {
   createContact,
   getContactByEmail,

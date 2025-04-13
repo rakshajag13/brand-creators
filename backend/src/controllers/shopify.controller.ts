@@ -7,10 +7,19 @@ export const createShopifyStore = async (
   res: Response
 ): Promise<void> => {
   try {
+    const { user } = req as any;
+    const clientId = user?.client?.id;
+
+    if (!clientId) {
+      res
+        .status(401)
+        .json({ error: "Unauthorized: User not found or clientId is missing" });
+      return;
+    }
     const data = shopSchema.parse({
       storeName: req.body.storeName,
       storeUrl: req.body.storeUrl,
-      clientId: req.body.clientId,
+      clientId: clientId,
     });
     await shopService.createShopifyStore(data);
     res.status(201).send("shop created successfully");
@@ -25,7 +34,16 @@ export const createShopifyStore = async (
 
 export const getAllShops = async (req: Request, res: Response) => {
   try {
-    const clientId = Number(req.params.clientId);
+    const { user } = req as any;
+    const clientId = user?.client?.id;
+
+    if (!clientId) {
+      res
+        .status(401)
+        .json({ error: "Unauthorized: User not found or clientId is missing" });
+      return;
+    }
+
     const result = await shopService.getAllShops(clientId);
     res.status(200).json(result);
   } catch (error) {
@@ -39,6 +57,16 @@ export const getAllShops = async (req: Request, res: Response) => {
 
 export const getAllShopsById = async (req: Request, res: Response) => {
   try {
+    const { user } = req as any;
+    const clientId = user?.client?.id;
+
+    if (!clientId) {
+      res
+        .status(401)
+        .json({ error: "Unauthorized: User not found or clientId is missing" });
+      return;
+    }
+
     const shopId = Number(req.params.shopId);
     const result = await shopService.getAllShopsById(shopId);
     res.status(200).json(result);
@@ -53,6 +81,16 @@ export const getAllShopsById = async (req: Request, res: Response) => {
 
 export const deleteShopById = async (req: Request, res: Response) => {
   try {
+    const { user } = req as any;
+    const clientId = user?.client?.id;
+
+    if (!clientId) {
+      res
+        .status(401)
+        .json({ error: "Unauthorized: User not found or clientId is missing" });
+      return;
+    }
+
     const shopId = Number(req.params.shopId);
     await shopService.deleteShopById(shopId);
     res.status(201).send("shop deleted successfully");

@@ -12,6 +12,10 @@ export interface Contact {
   role: "CLIENT" | "CREATOR";
   status: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
   clientId: number;
+  group: {
+    name: string;
+    id: number;
+  };
 }
 
 export interface ContactData extends Contact {}
@@ -30,4 +34,19 @@ export interface Pagination {
   pageSize: number;
   currentPage: number;
   totalPages: number;
+}
+
+export interface Group {
+  id: number;
+  name: string;
+  description: string;
+  clientId: number;
+}
+
+export interface GroupData extends Group {}
+export interface GroupResponse {
+  group: GroupData;
+}
+export interface AllGroupResponse {
+  groups: GroupData[];
 }

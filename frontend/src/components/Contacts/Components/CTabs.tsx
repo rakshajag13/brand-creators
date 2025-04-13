@@ -1,8 +1,9 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import React from "react";
 import ContactList from "./Contacts/ContactList";
+import GroupList from "./Groups/GroupList";
 
-const tabNames = ["Contacts", "Groups"];
+const tabNames = ["Influencers", "Groups"];
 
 
 export const CTabs = () => {
@@ -25,9 +26,9 @@ export const CTabs = () => {
                 {
                     value === 0 && <ContactList />
                 }
-                {/* {
-                    value === 1 && <Groups />
-                } */}
+                {
+                    value === 1 && <GroupList />
+                }
 
             </Box>
         </div>

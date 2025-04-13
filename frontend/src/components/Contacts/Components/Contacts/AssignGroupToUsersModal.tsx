@@ -63,6 +63,7 @@ const AssignUsersToGroupModal: React.FC<AssignUsersToGroupModalProps> = ({ open,
         setLoading(true);
         await fetch(`http://localhost:4000/api/groups/${groupId}/users`, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userIds }),
         });

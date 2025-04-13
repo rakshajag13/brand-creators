@@ -145,7 +145,7 @@ const ContactList = () => {
                     textAlign: "center",
                 }}
             >
-                <Typography>Loading contacts...</Typography>
+                <Typography>Loading influencers...</Typography>
             </Paper>
         );
     }

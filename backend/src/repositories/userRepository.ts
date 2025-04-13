@@ -18,8 +18,22 @@ export const getUserByClientId = async (clientId: number) => {
 };
 
 export const getUserById = async (id: number) => {
-  return prisma.user.findUnique({
+  return prisma.clientUser.findUnique({
     where: { id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          role: true,
+          status: true,
+        },
+      },
+      client: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 };
 
@@ -64,9 +78,9 @@ export const getFirstUserMatchByFilter = async (resetToken: string) => {
 };
 
 export const totalUsersCount = async (
-  searchCondition: Prisma.ClientUserWhereInput
+  searchCondition: Prisma.UserWhereInput
 ) => {
-  return prisma.clientUser.count({
+  return prisma.user.count({
     where: searchCondition,
   });
 };
@@ -96,4 +110,34 @@ export const deleteContact = async (id: number) => {
       where: { id },
     }),
   ]);
+};
+export const deleteSingleContact = async (userId: number, clientId: number) => {
+  return prisma.clientUser.deleteMany({
+    where: {
+      userId,
+      clientId,
+    },
+  });
+};
+
+export const getClientUserByUserId = async (userId: number) => {
+  return prisma.clientUser.findMany({
+    where: { userId },
+  });
+};
+export const getUserGroups = async (clientId: number, userIds: number[]) => {
+  return prisma.userGroup.findMany({
+    where: {
+      userId: { in: userIds },
+      clientId,
+    },
+    include: {
+      group: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
 };

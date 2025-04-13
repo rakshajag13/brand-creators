@@ -96,7 +96,6 @@ async function brandSignup(
           industry: data.industry,
           businessType: data.businessType,
           website: data.website,
-          users: { connect: { id: registerdUser.id } },
         },
       });
 

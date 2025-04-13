@@ -7,6 +7,8 @@ import {
 const prisma = new PrismaClient();
 interface groupData {
   name: string;
+  description: string | null;
+  clientId: number;
 }
 interface groupResponse {
   group: groupData;
@@ -34,9 +36,11 @@ async function getAllGroups() {
   }
 }
 
-async function getGroupUsers(groupId: number) {
+async function getGroupUsers(groupId: number, clientId: number) {
   try {
-    const users = await prisma.userGroup.findMany({ where: { groupId } });
+    const users = await prisma.userGroup.findMany({
+      where: { groupId, clientId },
+    });
     if (!users) {
       throw new Error("Users not found");
     }
@@ -49,7 +53,7 @@ async function getGroupUsers(groupId: number) {
 
 async function assignUsersToGroup(input: AssignGroupUsersGroupType) {
   try {
-    const { groupId, userIds } = input;
+    const { groupId, userIds, clientId } = input;
 
     // Validate group existence
     const group = await prisma.group.findUnique({
@@ -71,6 +75,7 @@ async function assignUsersToGroup(input: AssignGroupUsersGroupType) {
         data: {
           groupId,
           userId,
+          clientId,
         },
       });
     });
@@ -84,17 +89,49 @@ async function assignUsersToGroup(input: AssignGroupUsersGroupType) {
   }
 }
 
-async function deleteGroup(groupId: number) {
+async function updateGroup(
+  groupId: number,
+  data: { name: string; description: string | null },
+  clientId: number
+) {
   try {
-    const group = await prisma.group.delete({
-      where: {
-        id: groupId,
-      },
+    const group = await prisma.group.update({
+      where: { id: groupId, clientId: clientId },
+      data,
     });
     return group;
   } catch (error) {
     console.log(error);
-    throw new Error("Failed to delete group " + error.message);
+    throw new Error("Failed to update group: " + error.message);
+  }
+}
+
+async function deleteGroup(groupIds: number[], clientId: number) {
+  try {
+    // Delete associated user groups first
+    await prisma.userGroup.deleteMany({
+      where: {
+        groupId: { in: groupIds },
+        clientId,
+      },
+    });
+
+    // Delete the groups
+    const deletedGroups = await prisma.group.deleteMany({
+      where: {
+        id: { in: groupIds },
+        clientId,
+      },
+    });
+
+    if (deletedGroups.count === 0) {
+      throw new Error("No groups found to delete");
+    }
+
+    return { message: `${deletedGroups.count} group(s) deleted successfully` };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to delete groups: " + error.message);
   }
 }
 
@@ -103,5 +140,6 @@ export const groupService = {
   getAllGroups,
   getGroupUsers,
   assignUsersToGroup,
+  updateGroup,
   deleteGroup,
 };

@@ -21,10 +21,10 @@ const CreateShoifyModal = ({ open, onClose }: CreateShopifyModalProps) => {
         const input = {
             storeName: data.storeName,
             storeUrl: data.storeShopifyUrl,
-            clientId: 17,
         };
         const res = await fetch("http://localhost:4000/api/shops", {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },

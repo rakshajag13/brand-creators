@@ -1,0 +1,69 @@
+/* Card styling */
+.integrations-card {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+/* No shops box styling */
+.no-shops-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.no-shops-text {
+    margin-bottom: 16px;
+    color: #555555;
+}
+
+/* Connect Shopify button styling */
+.connect-shopify-button {
+    background-color: #0070f3;
+    color: #ffffff;
+}
+
+.connect-shopify-button:hover {
+    background-color: #005bb5;
+}
+
+/* Connected shops header styling */
+.connected-shops-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.connected-shops-title {
+    font-weight: bold;
+    color: #333333;
+}
+
+/* Divider styling */
+.divider {
+    margin: 16px 0;
+}
+
+/* Shop card styling */
+.shop-card {
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.shop-name {
+    font-weight: bold;
+    color: #333333;
+}
+
+.shop-url {
+    color: #777777;
+    margin-top: 4px;
+}

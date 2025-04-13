@@ -38,6 +38,7 @@ async function createShopifyStore(data: shopType): Promise<shopResponse> {
 
 async function getAllShops(clientId: number) {
   try {
+    console.log("clientId", clientId);
     const shops = await prisma.shops.findMany({
       where: { clientId: { equals: clientId } },
     });

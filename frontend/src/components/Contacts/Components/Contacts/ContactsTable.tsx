@@ -17,18 +17,6 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  "&:hover": {
-    backgroundColor: theme.palette.action.selected,
-  },
-  // Prevent double borders
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
 
 interface ContactsTableProps {
   contacts: Contact[];
@@ -66,6 +54,7 @@ export const ContactsTable = ({
         </TableHead>
         <TableBody>
           {contacts.map((contact) => {
+            console.log(contact);
             const isSelected = selected.indexOf(contact.id) !== -1;
             return (
               <TableRow
@@ -87,7 +76,7 @@ export const ContactsTable = ({
                 <StyledTableCell>{contact.phone}</StyledTableCell>
                 <StyledTableCell>{contact.role}</StyledTableCell>
                 <StyledTableCell>{contact.status}</StyledTableCell>
-                {/* <StyledTableCell>{contact.group}</StyledTableCell> */}
+                <StyledTableCell>{contact?.group?.name}</StyledTableCell>
               </TableRow>
             );
           })}

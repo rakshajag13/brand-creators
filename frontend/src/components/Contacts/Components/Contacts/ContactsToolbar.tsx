@@ -63,7 +63,7 @@ const ToolbarTitle = ({ userIds }: { userIds: number[] }) => (
     variant={userIds.length > 0 ? "subtitle1" : "h6"}
     component="div"
   >
-    {userIds.length > 0 ? `${userIds.length} selected` : "Contacts"}
+    {userIds.length > 0 ? `${userIds.length} selected` : "Influencers"}
   </Typography>
 );
 

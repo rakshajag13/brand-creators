@@ -9,7 +9,7 @@ import {
 export async function CreateContact(req: Request, res: Response) {
   try {
     const { user } = req as any;
-    if (!user || !user.clientId) {
+    if (!user || !user.client.id) {
       res
         .status(401)
         .json({ error: "Unauthorized: User not found or clientId is missing" });
@@ -17,8 +17,9 @@ export async function CreateContact(req: Request, res: Response) {
     }
     const input = {
       ...req.body,
-      clientId: user.clientId,
+      clientId: user.client.id,
     };
+    console.log("input", input);
     const contact = await contactService.createContact(input);
     res.status(201).json(contact);
   } catch (error) {
@@ -55,7 +56,7 @@ export async function GetAllContacts(req: Request, res: Response) {
     // const user = req.user;
     const { user } = req as any;
     // Check if user is authenticated and has clientId
-    if (!user || !user.clientId) {
+    if (!user || !user.client.id) {
       res
         .status(401)
         .json({ error: "Unauthorized: User not found or clientId is missing" });
@@ -68,7 +69,7 @@ export async function GetAllContacts(req: Request, res: Response) {
       sortBy: sortBy as SortBy,
       sortOrder: sortOrder as SortOrder,
     };
-    const result = await contactService.getAllContacts(user.clientId, obj);
+    const result = await contactService.getAllContacts(user.client.id, obj);
 
     res.status(200).json(result);
   } catch (error) {
@@ -122,11 +123,29 @@ export async function UpdateContact(req: Request, res: Response) {
 export async function DeleteContact(req: Request, res: Response) {
   try {
     const { ids } = req.body;
-    await contactService.deleteContacts(ids as number[]);
+    const { user } = req as any;
+
+    if (!user?.client?.id) {
+      res
+        .status(401)
+        .json({ error: "Unauthorized: User not found or clientId is missing" });
+      return;
+    }
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      res.status(400).json({ error: "Invalid or empty 'ids' array provided" });
+      return;
+    }
+
+    const deletedCount = await contactService.deleteContacts(
+      ids as number[],
+      user.client.id
+    );
+
     res.status(200).json({
       success: true,
       message: "Contacts deleted successfully",
-      deletedCount: ids.length,
+      deletedCount,
     });
   } catch (error) {
     if (error instanceof Error) {

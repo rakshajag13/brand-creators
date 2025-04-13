@@ -91,6 +91,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
         `http://localhost:4000/api/contacts/contactsByEmail/${email}`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             // Add authorization token if needed
@@ -153,6 +154,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
         )}`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -178,6 +180,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(true);
       const res = await fetch(`http://localhost:4000/api/contacts/contacts/${id}`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           // Add authorization token if needed
@@ -213,6 +216,7 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(true);
       const res = await fetch(`http://localhost:4000/api/contacts/contacts`, {
         method: "DELETE",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           // Add authorization token if needed
