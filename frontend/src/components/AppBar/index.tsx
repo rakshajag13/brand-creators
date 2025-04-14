@@ -26,6 +26,10 @@ export default function PrimarySearchAppBar() {
     navigate("/login");
   };
 
+  const handleSetting = () => {
+    navigate("/settings");
+  };
+
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -91,6 +95,7 @@ export default function PrimarySearchAppBar() {
           isMenuOpen={isMenuOpen}
           handleMenuClose={handleMenuClose}
           handleLogout={handleLogout}
+          handleSetting={handleSetting}
         />
       </Box>
       <AppDrawer open={drawerOpen} toggleDrawer={() => setDrawerOpen(false)} />

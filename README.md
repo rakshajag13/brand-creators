@@ -5,36 +5,42 @@ A full-stack application for managing creator-client relationships, product cata
 ## 🌟 Features
 
 ### Product Management
+
 - Individual product creation and management
 - Bulk product upload via CSV
 - Product categorization and inventory tracking
 - Image management
 
 ### Client Management
+
 - Multi-step client onboarding
 - Company profile management
 - Client-creator relationship management
 - Role-based access control
 
 ### Creator Portal
+
 - Creator invitation system
 - Profile management
 - Performance analytics
 - Payment processing
 
 ### Communication
+
 - Real-time chat system
 - File sharing
 - Message history
 - Presence indicators
 
 ### Analytics & Reporting
+
 - Sales impact metrics
 - Performance dashboards
 - Custom report generation
 - Data export capabilities
 
 ### Payment Processing
+
 - Secure payment integration
 - Automated billing
 - Creator payout management
@@ -43,6 +49,7 @@ A full-stack application for managing creator-client relationships, product cata
 ## 🚀 Technology Stack
 
 ### Frontend
+
 - React.js (18.x)
 - TypeScript
 - Material-UI / Tailwind CSS
@@ -50,6 +57,7 @@ A full-stack application for managing creator-client relationships, product cata
 - Redux Toolkit
 
 ### Backend
+
 - Node.js (18.x)
 - Express.js
 - TypeScript
@@ -57,10 +65,12 @@ A full-stack application for managing creator-client relationships, product cata
 - Bull (for job processing)
 
 ### Databases
+
 - PostgreSQL (primary database)
 - Redis (caching & session management)
 
 ### Infrastructure
+
 - Docker
 - Nginx
 - AWS (recommended hosting)
@@ -76,12 +86,14 @@ A full-stack application for managing creator-client relationships, product cata
 ## 🛠️ Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/your-org/creator-management-platform.git
 cd creator-management-platform
 ```
 
 2. Install dependencies:
+
 ```bash
 # Install backend dependencies
 cd backend
@@ -93,6 +105,7 @@ yarn install
 ```
 
 3. Set up environment variables:
+
 ```bash
 # Backend environment variables (.env)
 cp backend/.env.example backend/.env
@@ -102,6 +115,7 @@ cp frontend/.env.example frontend/.env
 ```
 
 4. Start the development environment:
+
 ```bash
 # Using Docker
 docker-compose up -d
@@ -119,18 +133,21 @@ yarn dev
 ## 🗄️ Database Setup
 
 1. Create the databases:
+
 ```bash
 createdb creator_platform_dev
 createdb creator_platform_test
 ```
 
 2. Run migrations:
+
 ```bash
 cd backend
 yarn migrate
 ```
 
 3. (Optional) Seed sample data:
+
 ```bash
 yarn seed
 ```
@@ -140,6 +157,7 @@ yarn seed
 ### Environment Variables
 
 #### Backend (.env)
+
 ```
 NODE_ENV=development
 PORT=3000
@@ -155,6 +173,7 @@ STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
 ```
 
 #### Frontend (.env)
+
 ```
 REACT_APP_API_URL=http://localhost:3000
 REACT_APP_STRIPE_PUBLIC_KEY=your-stripe-public-key
@@ -197,6 +216,7 @@ REACT_APP_WEBSOCKET_URL=ws://localhost:3000
 ## 🧪 Testing
 
 ### Backend Tests
+
 ```bash
 cd backend
 yarn test        # Run all tests
@@ -205,6 +225,7 @@ yarn test:cov    # Generate coverage report
 ```
 
 ### Frontend Tests
+
 ```bash
 cd frontend
 yarn test        # Run all tests
@@ -215,12 +236,14 @@ yarn test:cov    # Generate coverage report
 ## 📝 API Documentation
 
 API documentation is available at:
+
 - Development: http://localhost:3000/api-docs
 - Production: https://your-domain.com/api-docs
 
 ## 🚀 Deployment
 
 ### Using Docker
+
 ```bash
 # Build images
 docker-compose -f docker-compose.prod.yml build
@@ -230,19 +253,23 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### Manual Deployment
+
 1. Build the frontend:
+
 ```bash
 cd frontend
 yarn build
 ```
 
 2. Build the backend:
+
 ```bash
 cd backend
 yarn build
 ```
 
 3. Start the production server:
+
 ```bash
 yarn start
 ```
@@ -268,6 +295,7 @@ yarn start
 ## 📜 Scripts
 
 ### Backend
+
 ```json
 {
   "dev": "Start development server",
@@ -282,6 +310,7 @@ yarn start
 ```
 
 ### Frontend
+
 ```json
 {
   "dev": "Start development server",
@@ -297,11 +326,13 @@ yarn start
 ### Common Issues
 
 1. **Database Connection Errors**
+
    - Check PostgreSQL service is running
    - Verify database credentials in .env
    - Ensure database exists
 
 2. **Redis Connection Errors**
+
    - Check Redis service is running
    - Verify Redis URL in .env
 
@@ -309,6 +340,12 @@ yarn start
    - Check WebSocket URL configuration
    - Verify network connectivity
    - Check firewall settings
+
+## Run migrations
+
+-add schema in schema.prosma file
+-run npx prisma generate
+-run npx prosma migrate dev and give name of migration
 
 ## 📚 Additional Resources
 

@@ -5,6 +5,7 @@ interface ProfileMenuProps {
   isMenuOpen: boolean;
   handleMenuClose: () => void;
   handleLogout: () => void;
+  handleSetting: () => void;
 }
 
 export const ProfileMenu = ({
@@ -12,6 +13,7 @@ export const ProfileMenu = ({
   isMenuOpen,
   handleMenuClose,
   handleLogout,
+  handleSetting
 }: ProfileMenuProps) => (
   <Menu
     anchorEl={anchorEl}
@@ -30,6 +32,7 @@ export const ProfileMenu = ({
   >
     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
     <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+    <MenuItem onClick={() => { handleMenuClose(); handleSetting() }}>Settings</MenuItem>
     <MenuItem onClick={handleLogout}>Logout</MenuItem>
   </Menu>
 );

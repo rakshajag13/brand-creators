@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { authService } from "../services/auth.service";
-import { RegisterDTO } from "../dtos/auth.dto";
+import { RegisterDTO, BrandSignupDTO } from "../dtos/auth.dto";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -18,8 +18,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await authService.login(req.body);
-    res.status(200).json(result);
+    return authService.login(req, res, (err: any) => {
+      if (err) {
+        return res.status(401).json({ message: err.message });
+      }
+      return res.status(200).json(req.user);
+    });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });
@@ -34,7 +38,8 @@ export const brandSignup = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { clientId } = await authService.brandSignup(req.body);
+    const data = BrandSignupDTO.parse(req.body);
+    const { clientId } = await authService.brandSignup(data);
     res.status(201).json({ clientId });
   } catch (error) {
     if (error instanceof Error) {

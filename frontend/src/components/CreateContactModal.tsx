@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import {
   Box,
@@ -56,9 +56,10 @@ interface CreateContactModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ContactData) => void;
+  input?: ContactData;
+  editMode?: boolean;
 }
 
-// Updated form fields configuration
 const FORM_FIELDS = [
   { name: "firstName", label: "First Name", required: true },
   { name: "lastName", label: "Last Name", required: true },
@@ -71,14 +72,14 @@ const FORM_FIELDS = [
   },
 ] as const;
 
-// Reusable form field component
 const FormField: React.FC<{
   name: keyof ContactData;
   label: string;
   control: Control<ContactData>;
   error?: FieldError;
   placeholder?: string;
-}> = ({ name, label, control, error, placeholder }) => (
+  disabled?: boolean;
+}> = ({ name, label, control, error, placeholder, disabled }) => (
   <Controller
     name={name}
     control={control}
@@ -91,6 +92,7 @@ const FormField: React.FC<{
         error={!!error}
         helperText={error?.message}
         placeholder={placeholder}
+        disabled={disabled}
       />
     )}
   />
@@ -100,16 +102,19 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
   open,
   onClose,
   onSubmit,
+  input,
+  editMode = false,
 }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createContact } = useContact();
+  const { createContact, updateContact } = useContact();
   const navigate = useNavigate();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ContactData>({
     resolver: zodResolver(contactSchema),
     mode: "onSubmit",
@@ -122,16 +127,37 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
     },
   });
 
+  useEffect(() => {
+
+    reset({
+      email: input?.email || "",
+      firstName: input?.firstName || "",
+      lastName: input?.lastName || "",
+      phone: input?.phone || "",
+      role: input?.role || "CREATOR",
+    });
+
+  }, [input, reset]);
+
   const handleFormSubmit = async (data: ContactData) => {
     setIsSubmitting(true);
     setErrorMessage(null);
 
     try {
-      const { error } = await createContact(data);
-      if (error) {
-        setErrorMessage(error);
-        return;
+      if (!editMode) {
+        const { error } = await createContact(data);
+        if (error) {
+          setErrorMessage(error);
+          return;
+        }
+      } else {
+        const { error } = await updateContact(input?.id || 0, data);
+        if (error) {
+          setErrorMessage(error);
+          return;
+        }
       }
+
       navigate("/Home");
     } catch (err) {
       setErrorMessage("An unexpected error occurred. Please try again.");
@@ -154,7 +180,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
           padding: "1.5rem 2rem",
         }}
       >
-        Create New Contact
+        {editMode ? "Edit Contact" : "Create New Contact"}
       </DialogTitle>
       <DialogContent sx={{ padding: 0 }}>
         <form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -166,6 +192,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                 label={label}
                 control={control}
                 error={errors[name]}
+                disabled={name === "email" && editMode}
               />
             ))}
             <Controller
@@ -181,7 +208,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                   error={!!errors.role}
                   helperText={errors.role?.message}
                 >
-                  {["ADMIN", "CLIENT", "CREATOR"].map((role) => (
+                  {["ADMIN", "CREATOR"].map((role) => (
                     <MenuItem key={role} value={role}>
                       {role.charAt(0) + role.slice(1).toLowerCase()}
                     </MenuItem>
@@ -215,7 +242,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
               className="submit-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating..." : "Create Contact"}
+              {isSubmitting ? "Saving..." : editMode ? "Save Changes" : "Create Contact"}
             </StyledButton>
           </DialogActions>
         </form>

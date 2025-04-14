@@ -1,10 +1,9 @@
 import { PrismaClient, UserRole } from "@prisma/client";
-import { comparePasswords, hashPassword } from "../utils/password";
+import { hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { Expiry } from "../validators/auth.validator";
 import { sendPasswordResetEmail } from "../utils/sendEmail";
 import {
-  createSession,
   createUser,
   createUserByCreatorRole,
   getFirstUserMatchByFilter,
@@ -13,17 +12,17 @@ import {
 } from "../repositories/userRepository";
 import {
   RegisterDTO,
-  BrandSignupDTO,
-  LoginDTO,
   ForgotPasswordDTO,
   ResetPasswordDTO,
   type RegisterData,
   type BrandSignupData,
-  type LoginData,
   type ForgotPasswordData,
   type ResetPasswordData,
   type AuthResponse,
 } from "../dtos/auth.dto";
+import passport from "passport";
+import { User } from "@prisma/client"; // Adjust the import path if necessary
+import { NextFunction, Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
@@ -64,7 +63,6 @@ async function brandSignup(
   data: BrandSignupData
 ): Promise<{ clientId: number }> {
   // First validate the data
-  BrandSignupDTO.parse(data);
 
   try {
     const existingUser = await getUserByEmail(data.email);
@@ -96,9 +94,18 @@ async function brandSignup(
           industry: data.industry,
           businessType: data.businessType,
           website: data.website,
-          users: { connect: { id: registerdUser.id } },
         },
       });
+
+      await tx.clientUser.create({
+        data: {
+          user: { connect: { id: registerdUser.id } },
+          client: { connect: { id: client.id } },
+          role: UserRole.CLIENT,
+          status: "ACTIVE",
+        },
+      });
+
       const existingDomain = await tx.clientDomain.findUnique({
         where: { domain: data.domain },
       });
@@ -115,40 +122,6 @@ async function brandSignup(
 
       return { clientId: client.id };
     });
-  } catch (error) {
-    throw error;
-  }
-}
-
-async function login(data: LoginData): Promise<AuthResponse> {
-  // First validate the data
-  LoginDTO.parse(data);
-
-  try {
-    const user = await getUserByEmail(data.email);
-
-    if (!user) {
-      throw new Error("Invalid Credientials");
-    }
-
-    const isPasswordValid = await comparePasswords(
-      data.password,
-      user.password
-    );
-
-    if (!isPasswordValid) {
-      throw new Error("Invalid Crendentials");
-    }
-
-    const { password, ...userWithoutPassword } = user;
-    const token = generateToken(user);
-
-    await createSession({
-      userId: user.id,
-      token,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), //24 hours
-    });
-    return { user: userWithoutPassword, token };
   } catch (error) {
     throw error;
   }
@@ -192,12 +165,41 @@ async function validateResetToken(token: string): Promise<boolean> {
   const user = await getFirstUserMatchByFilter(token);
   return !!user;
 }
+async function login(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  passport.authenticate("login", async (err: any, user: User, info: any) => {
+    try {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        return res.status(401).json({ message: info.message });
+      }
+
+      req.logIn(user, async (loginErr: Error | null) => {
+        if (loginErr) {
+          return next(loginErr);
+        }
+
+        // Explicitly set req.user
+        req.user = user;
+        res.json({ user });
+      });
+    } catch (error) {
+      next(error);
+    }
+  })(req, res, next);
+}
+
 // Export functions
 export const authService = {
   register,
   brandSignup,
-  login,
   forgotPassword,
   resetPassword,
+  login,
   validateResetToken,
 };

@@ -1,11 +1,15 @@
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import {
   User,
   ContactData,
   ContactResponse,
   AllContactResponse,
+  Contact,
+  Pagination
 } from "../types/contact";
+import { DEFAULT_PAGINATION } from "../components/Contacts/constants";
+
 
 type GetContactsParams = {
   page: number;
@@ -14,14 +18,17 @@ type GetContactsParams = {
 interface ContactContextType {
   user: User | null;
   isLoading: boolean;
+  contacts: Contact[];
+  pagination: Pagination;
   createContact: (
     data: ContactData
   ) => Promise<{ data: User | null; error: string | null }>;
   getContactByEmail: (email: string) => Promise<User | null>;
-  getAllContacts: (params: GetContactsParams) => Promise<AllContactResponse>;
+  getAllContacts: (params: GetContactsParams) => Promise<void>;
   searchContacts: (query: string) => Promise<User[]>;
-  // updateContact: (id: string, data: Partial<User>) => Promise<void>;
-  // deleteContact: (id: string) => Promise<void>;
+  updateContact: (id: number, data: Contact) => Promise<{ data: User | null; error: string | null }>;
+  deleteContacts: (id: number[]) => Promise<void>;
+  setPagination: React.Dispatch<React.SetStateAction<Pagination>>;
 }
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
@@ -39,14 +46,18 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [pagination, setPagination] = useState<Pagination>(DEFAULT_PAGINATION);
 
   const createContact = async (data: ContactData) => {
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:4000/api/contact/contacts", {
+      const res = await fetch("http://localhost:4000/api/contacts/contacts", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+
           // Add authorization token if needed
           // "Authorization": `Bearer ${token}`
         },
@@ -85,9 +96,10 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
       const res = await fetch(
-        `http://localhost:4000/api/contact/contactsByEmail/${email}`,
+        `http://localhost:4000/api/contacts/contactsByEmail/${email}`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             // Add authorization token if needed
@@ -111,28 +123,33 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getAllContacts = useCallback(
-    async ({
-      page,
-      pageSize,
-    }: GetContactsParams): Promise<AllContactResponse> => {
-      const token = localStorage.getItem("token");
+    async (params: GetContactsParams) => {
+      const { page, pageSize } = params;
+
       try {
         const res = await fetch(
-          `http://localhost:4000/api/contact/contacts?page=${page}&pageSize=${pageSize}`,
+          `http://localhost:4000/api/contacts/contacts?page=${page}&pageSize=${pageSize}`,
           {
             method: "GET",
+            credentials: "include",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
             },
           }
         );
 
         if (!res.ok) {
-          throw new Error("Failed to fetch contacts");
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to fetch contacts");
         }
-
-        return await res.json();
+        const data = await res.json();
+        console.log("Fetched contacts:", data);
+        setContacts(data.contacts);
+        setPagination((prev) => ({
+          ...prev,
+          ...data.pagination,
+          currentPage: page,
+        }));
       } catch (error) {
         console.error("Get all contacts error:", error);
         throw error;
@@ -146,11 +163,12 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
       const res = await fetch(
-        `http://localhost:4000/api/contact/contacts/search?q=${encodeURIComponent(
+        `http://localhost:4000/api/contacts/contacts/search?q=${encodeURIComponent(
           query
         )}`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -171,64 +189,89 @@ export const ContactProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // const updateContact = async (id: string, data: Partial<User>) => {
-  //     try {
-  //         setIsLoading(true);
-  //         const res = await fetch(`http://localhost:4000/api/contacts/${id}`, {
-  //             method: "PATCH",
-  //             headers: {
-  //                 "Content-Type": "application/json",
-  //                 // Add authorization token if needed
-  //                 // "Authorization": `Bearer ${token}`
-  //             },
-  //             body: JSON.stringify(data)
-  //         });
+  const updateContact = useCallback(async (id: number, data: Contact) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`http://localhost:4000/api/contacts/contacts/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authorization token if needed
+          // "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+      });
 
-  //         if (!res.ok) {
-  //             throw new Error("Failed to update contact");
-  //         }
-  //     } catch (error) {
-  //         console.error("Update contact error:", error);
-  //         throw error;
-  //     } finally {
-  //         setIsLoading(false);
-  //     }
-  // };
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to update contact");
+      }
+      const contactResponse: ContactResponse = await res.json();
+      setUser(contactResponse.user);
 
-  // const deleteContact = async (id: string) => {
-  //     try {
-  //         setIsLoading(true);
-  //         const res = await fetch(`http://localhost:4000/api/contacts/${id}`, {
-  //             method: "DELETE",
-  //             headers: {
-  //                 "Content-Type": "application/json",
-  //                 // Add authorization token if needed
-  //                 // "Authorization": `Bearer ${token}`
-  //             }
-  //         });
+      return {
+        data: contactResponse.user,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Update contact error:", error);
+      return {
+        error: error instanceof Error ? error.message : "Unknown error",
+        data: null,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  //         if (!res.ok) {
-  //             throw new Error("Failed to delete contact");
-  //         }
-  //     } catch (error) {
-  //         console.error("Delete contact error:", error);
-  //         throw error;
-  //     } finally {
-  //         setIsLoading(false);
-  //     }
-  // };
+  const deleteContacts = async (ids: number[]) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`http://localhost:4000/api/contacts/contacts`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authorization token if needed
+          // "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete contacts");
+      }
+    } catch (error) {
+      console.error("Delete contacts error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAllContacts({ page: 1, pageSize: 10 });
+  }, [getAllContacts]);
+
+
+
+
 
   return (
     <ContactContext.Provider
       value={{
         user,
         isLoading,
+        contacts,
+        pagination,
         createContact,
-        getContactByEmail,
         getAllContacts,
+        getContactByEmail,
         searchContacts,
-        // updateContact,
-        // deleteContact
+        updateContact,
+        deleteContacts,
+        setPagination
       }}
     >
       {children}

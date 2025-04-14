@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Contact } from "types/contact";
-import { TABLE_HEADERS } from "./constants";
+import { TABLE_HEADERS } from "../../constants";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 500,
@@ -17,24 +17,12 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  "&:hover": {
-    backgroundColor: theme.palette.action.selected,
-  },
-  // Prevent double borders
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
 
 interface ContactsTableProps {
   contacts: Contact[];
-  selected: string[];
+  selected: number[];
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSelectClick: (id: string) => void;
+  onSelectClick: (id: number) => void;
 }
 
 export const ContactsTable = ({
@@ -66,7 +54,8 @@ export const ContactsTable = ({
         </TableHead>
         <TableBody>
           {contacts.map((contact) => {
-            const isSelected = selected.indexOf(contact.id.toString()) !== -1;
+            const groups = contact.groups.map((group) => group.name);
+            const isSelected = selected.indexOf(contact.id) !== -1;
             return (
               <TableRow
                 hover
@@ -79,7 +68,7 @@ export const ContactsTable = ({
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={isSelected}
-                    onClick={() => onSelectClick(contact.id.toString())}
+                    onClick={() => onSelectClick(contact.id)}
                   />
                 </TableCell>
                 <StyledTableCell>{`${contact.firstName} ${contact.lastName}`}</StyledTableCell>
@@ -87,6 +76,7 @@ export const ContactsTable = ({
                 <StyledTableCell>{contact.phone}</StyledTableCell>
                 <StyledTableCell>{contact.role}</StyledTableCell>
                 <StyledTableCell>{contact.status}</StyledTableCell>
+                <StyledTableCell>{groups?.join(", ")}</StyledTableCell>
               </TableRow>
             );
           })}

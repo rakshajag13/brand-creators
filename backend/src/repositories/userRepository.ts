@@ -11,6 +11,32 @@ export const getUserByEmail = async (email: string) => {
   });
 };
 
+export const getUserByClientId = async (clientId: number) => {
+  return prisma.clientUser.findMany({
+    where: { clientId },
+  });
+};
+
+export const getUserById = async (id: number) => {
+  return prisma.clientUser.findUnique({
+    where: { id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          role: true,
+          status: true,
+        },
+      },
+      client: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+};
+
 export const createUser = async (data: any) => {
   return prisma.user.create({
     data,
@@ -19,6 +45,11 @@ export const createUser = async (data: any) => {
 
 export const createClient = async (data: any) => {
   return prisma.client.create(data);
+};
+export const createClientUser = async (data: any) => {
+  return prisma.clientUser.create({
+    data,
+  });
 };
 
 export const createSession = async (data: any) => {
@@ -51,5 +82,62 @@ export const totalUsersCount = async (
 ) => {
   return prisma.user.count({
     where: searchCondition,
+  });
+};
+
+export const updateContactById = async (id: number, data: any) => {
+  return await prisma.user.update({
+    where: { id },
+    data,
+  });
+};
+export const deleteContact = async (id: number) => {
+  return await prisma.$transaction([
+    prisma.creator.deleteMany({
+      where: { userId: id },
+    }),
+    prisma.userGroup.deleteMany({
+      where: { userId: id },
+    }),
+    prisma.clientUser.deleteMany({
+      where: { userId: id },
+    }),
+    prisma.session.deleteMany({
+      where: { userId: id },
+    }),
+
+    prisma.user.delete({
+      where: { id },
+    }),
+  ]);
+};
+export const deleteSingleContact = async (userId: number, clientId: number) => {
+  return prisma.clientUser.deleteMany({
+    where: {
+      userId,
+      clientId,
+    },
+  });
+};
+
+export const getClientUserByUserId = async (userId: number) => {
+  return prisma.clientUser.findMany({
+    where: { userId },
+  });
+};
+export const getUserGroups = async (clientId: number, userIds: number[]) => {
+  return prisma.userGroup.findMany({
+    where: {
+      userId: { in: userIds },
+      clientId,
+    },
+    include: {
+      group: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
   });
 };

@@ -27,8 +27,6 @@ model User {
   resetToken String
 
   // Relations
-  client           Client?       @relation("ClientUsers", fields: [clientId], references: [id])
-  clientId         Int?
   creator          Creator?
   sentMessages     Message[]     @relation("MessageSender")
   receivedMessages Message[]     @relation("MessageReceiver")
@@ -37,6 +35,9 @@ model User {
   invitations      Invitation[]  @relation("Invitations")
   transactions     Transaction[]
   sessions         Session[]
+  groups           Group[]       @relation("UserGroups")
+  UserGroup        UserGroup[]
+  ClientUser       ClientUser[]
 
   @@map("users")
 }
@@ -54,6 +55,23 @@ enum UserRole {
   CREATOR
 }
 
+model ClientUser {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  clientId  Int
+  role      UserRole   @default(CREATOR)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@unique([userId, clientId]) // Ensure unique user-client assignments
+  @@map("client_users")
+}
+
 // Client Management
 model Client {
   id           Int      @id @default(autoincrement())
@@ -66,13 +84,30 @@ model Client {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  users          User[]          @relation("ClientUsers")
+
   products       Product[]
   billingDetails BillingDetail[]
   creators       Creator[]
   ClientDomain   ClientDomain[]
+  Shops          Shops[]         @relation("ClientUsers")
+  ClientUser     ClientUser[]
+  UserGroup      UserGroup[]
+  Group          Group[]
 
   @@map("clients")
+}
+
+model Shops {
+  id          Int      @id @default(autoincrement())
+  storeName   String
+  storeUrl    String
+  apiKey      String
+  apiSecret   String
+  accessToken String
+  client      Client?  @relation("ClientUsers", fields: [clientId], references: [id])
+  clientId    Int?
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @default(now())
 }
 
 model ClientDomain {
@@ -298,4 +333,32 @@ model ReportSettings {
   updatedAt DateTime  @updatedAt
 
   @@map("report_settings")
+}
+
+model Group {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String?
+  clientId    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  users       User[]      @relation("UserGroups")
+  UserGroup   UserGroup[]
+
+  client Client @relation(fields: [clientId], references: [id])
+}
+
+model UserGroup {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  groupId   Int
+  clientId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  group  Group  @relation(fields: [groupId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
+
+  @@unique([userId, groupId, clientId]) // Ensure unique user-group assignments
 }
