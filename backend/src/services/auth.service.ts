@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from "@prisma/client";
+import { ClientUser, PrismaClient, UserRole } from "@prisma/client";
 import { hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { Expiry } from "../validators/auth.validator";
@@ -9,6 +9,7 @@ import {
   getFirstUserMatchByFilter,
   getUserByEmail,
   updateUser,
+  getUserById,
 } from "../repositories/userRepository";
 import {
   RegisterDTO,
@@ -21,7 +22,6 @@ import {
   type AuthResponse,
 } from "../dtos/auth.dto";
 import passport from "passport";
-import { User } from "@prisma/client"; // Adjust the import path if necessary
 import { NextFunction, Request, Response } from "express";
 
 const prisma = new PrismaClient();
@@ -132,13 +132,17 @@ async function forgotPassword(data: ForgotPasswordData): Promise<void> {
   ForgotPasswordDTO.parse(data);
 
   const user = await getUserByEmail(data.email);
-
   if (!user) {
+    throw new Error("Invalid Credientials");
+  }
+  const clientUser = await getUserById(user.id);
+
+  if (!user || !clientUser) {
     throw new Error("Invalid Credientials");
   }
 
   // Update user with reset token
-  const resetToken = generateToken(user, Expiry.ONE_HOUR);
+  const resetToken = generateToken(clientUser, Expiry.ONE_HOUR);
 
   await updateUser(user.id, { resetToken, updatedAt: new Date() });
 
@@ -170,28 +174,31 @@ async function login(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  passport.authenticate("login", async (err: any, user: User, info: any) => {
-    try {
-      if (err) {
-        return next(err);
-      }
-      if (!user) {
-        return res.status(401).json({ message: info.message });
-      }
-
-      req.logIn(user, async (loginErr: Error | null) => {
-        if (loginErr) {
-          return next(loginErr);
+  passport.authenticate(
+    "login",
+    async (err: any, user: ClientUser, info: any) => {
+      try {
+        if (err) {
+          return next(err);
         }
-
-        // Explicitly set req.user
+        if (!user) {
+          return res.status(401).json({ message: info.message });
+        }
         req.user = user;
-        res.json({ user });
-      });
-    } catch (error) {
-      next(error);
+        res.json(info);
+        // req.logIn(user, async (loginErr: Error | null) => {
+        //   if (loginErr) {
+        //     return next(loginErr);
+        //   }
+
+        //   // Explicitly set req.user
+
+        // });
+      } catch (error) {
+        next(error);
+      }
     }
-  })(req, res, next);
+  )(req, res, next);
 }
 
 // Export functions
