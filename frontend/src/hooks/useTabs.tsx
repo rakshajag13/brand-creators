@@ -6,7 +6,7 @@ export const useTabs = (tabs: string[]) => {
     const [activeTab, setActiveTab] = React.useState<number>(0);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         //generate hash route
-        const hashRoute = `${location.pathname}#${tabs[newValue]}`;
+        const hashRoute = `${location.pathname}#${tabs[newValue].toLowerCase()}`;
         setActiveTab(newValue);
         //check if hash route is already in the url
         if (location.hash !== hashRoute) {
@@ -18,7 +18,7 @@ export const useTabs = (tabs: string[]) => {
 
         let tabFound = false;
         for (let i = 0; i < tabs.length; i++) {
-            const hashRoute = `#${tabs[i]}`;
+            const hashRoute = `#${tabs[i].toLowerCase()}`;
 
             if (location.hash === hashRoute) {
                 setActiveTab(i);
@@ -28,7 +28,7 @@ export const useTabs = (tabs: string[]) => {
         }
         if (!tabFound) {
             //generate hash route
-            const hashRoute = `${location.pathname}#${tabs[0]}`;
+            const hashRoute = `${location.pathname}#${tabs[0].toLowerCase()}`;
             //check if hash route is already in the url
             if (location.hash !== hashRoute) {
                 navigate(hashRoute);

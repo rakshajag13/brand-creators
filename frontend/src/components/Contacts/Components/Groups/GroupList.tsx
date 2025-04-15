@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GroupsToolbar } from "../Groups/GroupsToolbar";
 import { Paper, Typography } from "@mui/material";
 import { GroupTable } from "./GroupTable";
@@ -7,6 +7,8 @@ import { CreateGroupModal } from "components/CreateGroupModal";
 import { Group } from "types/contact";
 import { useContact } from "context/ContactContext";
 import { requestHandler } from "utils/requestHandler";
+import ConfirmDialog from "../../../ConfirmDialog";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 
@@ -19,6 +21,9 @@ const GroupList = () => {
     const [error, setError] = useState<string | null>(null);
     const [groupRecord, setGroupRecord] = useState<Group | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
+    const [confirmDialog, setConfirmDialog] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const fetchGroups = useCallback(
         async () => {
@@ -72,6 +77,7 @@ const GroupList = () => {
     };
 
     const handleCreateGroup = () => {
+        //navigate(`${location.pathname + location.hash}`);
         setOpenCreateGroupModal(false);
         fetchGroups();
     };
@@ -85,14 +91,20 @@ const GroupList = () => {
         setEditMode(true);
 
     }, [groups, selected]);
+    const handleConfirmDeleteGroup = () => {
+        setConfirmDialog(true);
+    }
+
+    const handleOnConfirm = () => {
+        handleDeleteGroup();
+        setConfirmDialog(false);
+    }
 
     const handleDeleteGroup = useCallback(async () => {
         if (selected.length === 0) return;
 
         try {
-            await requestHandler<Group[]>('DELETE', `/api/groups?groupIds=${selected.join(',')}`)
-
-
+            await requestHandler<Group[]>('DELETE', `/api/groups?groupIds=${selected.join(',')}`);
             setSelected([]);
             fetchGroups();
             getAllContacts({ page: 1, pageSize: 10 });
@@ -127,7 +139,7 @@ const GroupList = () => {
         <><GroupsToolbar
             userIds={selected}
             onEditGroup={handleEditGroup}
-            onDeleteGroup={handleDeleteGroup}
+            onDeleteGroup={handleConfirmDeleteGroup}
             onCreateGroup={() => {
                 setEditMode(false);
                 setGroupRecord(undefined);
@@ -147,9 +159,17 @@ const GroupList = () => {
                 }
                 input={groupRecord}
                 editMode={editMode} />
+            <ConfirmDialog
+                open={confirmDialog}
+                onClose={() => {
+                    setConfirmDialog(false);
+                }}
+                onConfirm={handleOnConfirm}
+
+            />
         </>
     );
 }
 
 
-export default GroupList;
+export default React.memo(GroupList);

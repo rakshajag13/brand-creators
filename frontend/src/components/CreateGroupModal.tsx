@@ -13,7 +13,7 @@ import {
 import { Control, Controller, FieldError, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+
 import { GroupData, GroupResponse } from "../types/contact";
 import { requestHandler } from "../utils/requestHandler";
 
@@ -58,7 +58,7 @@ const FORM_FIELDS = [
 interface CreateGroupModalProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (data: GroupData) => void;
+    onSubmit: () => void;
     input?: GroupData;
     editMode?: boolean;
 }
@@ -102,7 +102,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [group, setgroup] = useState<GroupData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
+
 
     const {
         control,
@@ -162,7 +162,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                 return;
             }
 
-            navigate("/Home");
+            onSubmit()
         } catch {
             setErrorMessage("An unexpected error occurred. Please try again.");
         } finally {

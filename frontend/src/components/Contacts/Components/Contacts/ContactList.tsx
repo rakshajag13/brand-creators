@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ContactsToolbar } from "./ContactsToolbar";
 import { Paper, TablePagination, Typography } from "@mui/material";
 import { ContactsTable } from "./ContactsTable";
 import { CreateContactModal } from "components/CreateContactModal";
 import { useContact } from "context/ContactContext";
 import { Contact } from "types/contact";
-import { Pagination } from '../../../../types/contact';
+
 
 
 const ContactList = () => {
@@ -67,7 +67,8 @@ const ContactList = () => {
 
     const handleCreateContact = () => {
         setOpenCreateContactModal(false);
-        //  fetchContacts(pagination.currentPage, pagination.pageSize);
+        getAllContacts({ page: pagination.currentPage, pageSize: pagination.pageSize })
+
     };
 
     const handleEditContact = React.useCallback(() => {
@@ -151,4 +152,4 @@ const ContactList = () => {
 }
 
 
-export default ContactList;
+export default React.memo(ContactList);

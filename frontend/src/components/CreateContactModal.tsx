@@ -55,7 +55,7 @@ export const contactSchema = z.object({
 interface CreateContactModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: ContactData) => void;
+  onSubmit: () => void;
   input?: ContactData;
   editMode?: boolean;
 }
@@ -108,7 +108,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createContact, updateContact } = useContact();
-  const navigate = useNavigate();
+
 
   const {
     control,
@@ -157,8 +157,8 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
           return;
         }
       }
+      onSubmit()
 
-      navigate("/Home");
     } catch (err) {
       setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {

@@ -5,11 +5,7 @@ import { validate } from "../middleware/validate";
 
 const router = Router();
 
-router.post(
-  "/contacts",
-  validate(contactSchema),
-  contactController.CreateContact
-);
+router.post("/", validate(contactSchema), contactController.CreateContact);
 router.get("/contactsByEmail/:email", contactController.GetContactByEmail);
 
 router.get("/", contactController.GetAllContacts);
