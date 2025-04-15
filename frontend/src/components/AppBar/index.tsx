@@ -26,6 +26,7 @@ export default function PrimarySearchAppBar() {
     navigate("/login");
   };
 
+
   const handleSetting = () => {
     navigate("/settings");
   };

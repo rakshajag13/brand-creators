@@ -10,6 +10,7 @@ import {
     CircularProgress,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { requestHandler } from "utils/requestHandler";
 
 const useStyles = makeStyles({
     dialogContent: {
@@ -48,8 +49,8 @@ const AssignUsersToGroupModal: React.FC<AssignUsersToGroupModalProps> = ({ open,
     useEffect(() => {
         const fetchGroups = async () => {
             try {
-                const response = await fetch("http://localhost:4000/api/groups");
-                const data = await response.json();
+                const res = await requestHandler<Group[]>('GET', '/api/groups')
+                const data = res.data;
                 setGroups(data);
             } catch (error) {
                 console.error("Failed to fetch groups:", error);
@@ -61,12 +62,7 @@ const AssignUsersToGroupModal: React.FC<AssignUsersToGroupModalProps> = ({ open,
 
     const handleAssign = async () => {
         setLoading(true);
-        await fetch(`http://localhost:4000/api/groups/${groupId}/users`, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userIds }),
-        });
+        await requestHandler<Group[]>('POST', `/api/groups/${groupId}/users`, { userIds });
         setLoading(false);
         onClose();
     };

@@ -34,8 +34,10 @@ const localLoginStategy = new LocalStrategy(
       //   token,
       //   expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       // });
+      const { password: _, ...userInfo } = user;
       const info = {
         token,
+        user: userInfo,
         message: "Login successful",
       };
       return done(null, { clientUser: clientUser }, info);

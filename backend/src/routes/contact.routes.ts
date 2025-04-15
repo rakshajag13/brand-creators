@@ -12,12 +12,12 @@ router.post(
 );
 router.get("/contactsByEmail/:email", contactController.GetContactByEmail);
 
-router.get("/contacts", contactController.GetAllContacts);
+router.get("/", contactController.GetAllContacts);
 
-router.get("/contacts/search", contactController.SearchContacts);
+router.get("/search", contactController.SearchContacts);
 
-router.patch("/contacts/:id", contactController.UpdateContact);
+router.patch("/:id", contactController.UpdateContact);
 
-router.delete("/contacts", contactController.DeleteContact);
+router.delete("/", contactController.DeleteContact);
 
 export default router;

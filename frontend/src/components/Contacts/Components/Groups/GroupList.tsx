@@ -6,6 +6,7 @@ import { CreateGroupModal } from "components/CreateGroupModal";
 
 import { Group } from "types/contact";
 import { useContact } from "context/ContactContext";
+import { requestHandler } from "utils/requestHandler";
 
 
 
@@ -24,13 +25,8 @@ const GroupList = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const res = await fetch("http://localhost:4000/api/groups", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-                const data = await res.json();
+                const res = await requestHandler<Group[]>('GET', '/api/groups')
+                const data = res.data;
                 setGroups(data);
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : "An error occurred");
@@ -94,13 +90,8 @@ const GroupList = () => {
         if (selected.length === 0) return;
 
         try {
-            await fetch(`http://localhost:4000/api/groups?groupIds=${selected.join(',')}`, {
-                method: "DELETE",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
+            await requestHandler<Group[]>('DELETE', `/api/groups?groupIds=${selected.join(',')}`)
+
 
             setSelected([]);
             fetchGroups();
@@ -108,7 +99,7 @@ const GroupList = () => {
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
         }
-    }, [selected, fetchGroups]);
+    }, [selected, fetchGroups, getAllContacts]);
 
     if (error) {
         return (

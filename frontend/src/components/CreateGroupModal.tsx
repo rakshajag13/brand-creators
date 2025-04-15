@@ -15,6 +15,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { GroupData, GroupResponse } from "../types/contact";
+import { requestHandler } from "../utils/requestHandler";
 
 // Styled Components
 const FormContainer = styled(Box)({
@@ -97,7 +98,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     input,
     editMode = false,
 }) => {
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | Error | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [group, setgroup] = useState<GroupData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -120,22 +121,9 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     const updateGroup = useCallback(async (id: number, data: GroupData) => {
         try {
             setIsLoading(true);
-            const res = await fetch(`http://localhost:4000/api/groups/${id}`, {
-                method: "PATCH",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    // Add authorization token if needed
-                    // "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(data),
-            });
+            const res = await requestHandler<GroupResponse>('PATCH', `/api/groups/${id}`, data)
 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Failed to update contact");
-            }
-            const groupResponse: GroupResponse = await res.json();
+            const groupResponse = res.data;
             setgroup(groupResponse.group);
 
             return {
@@ -167,12 +155,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         try {
             const response = editMode
                 ? await updateGroup(input?.id || 0, data)
-                : await fetch("http://localhost:4000/api/groups", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data),
-                });
+                : await requestHandler<GroupResponse>('POST', `/api/groups`, data)
 
             if ('error' in response && response.error) {
                 setErrorMessage(response.error);
@@ -225,7 +208,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                                 }}
                             >
                                 <Typography variant="body2" color="error" align="center">
-                                    {errorMessage}
+                                    {typeof errorMessage === "string" ? errorMessage : errorMessage?.toString()}
                                 </Typography>
                             </Box>
                         )}
