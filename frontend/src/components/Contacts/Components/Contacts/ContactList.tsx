@@ -5,6 +5,7 @@ import { ContactsTable } from "./ContactsTable";
 import { CreateContactModal } from "components/CreateContactModal";
 import { useContact } from "context/ContactContext";
 import { Contact } from "types/contact";
+import ConfirmDialog from "../../../ConfirmDialog";
 
 
 
@@ -16,6 +17,7 @@ const ContactList = () => {
     const [error, setError] = useState<string | null>(null);
     const [contactRecord, setContactRecord] = useState<Contact | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
+    const [confirmDialog, setConfirmDialog] = useState(false);
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
@@ -81,6 +83,15 @@ const ContactList = () => {
 
     }, [contacts, selected]);
 
+    const handleConfirmDeleteContact = () => {
+        setConfirmDialog(true);
+    }
+
+    const handleOnConfirm = () => {
+        handleDeleteContact();
+        setConfirmDialog(false);
+    }
+
     const handleDeleteContact = useCallback(async () => {
         if (selected.length === 0) return;
 
@@ -119,7 +130,7 @@ const ContactList = () => {
         <><ContactsToolbar
             userIds={selected}
             onEditContact={handleEditContact}
-            onDeleteContact={handleDeleteContact}
+            onDeleteContact={handleConfirmDeleteContact}
             onCreateContact={() => {
                 setEditMode(false);
                 setContactRecord(undefined);
@@ -147,7 +158,15 @@ const ContactList = () => {
                 }
                 }
                 input={contactRecord}
-                editMode={editMode} /></>
+                editMode={editMode} />
+            <ConfirmDialog
+                open={confirmDialog}
+                onClose={() => {
+                    setConfirmDialog(false);
+                }}
+                onConfirm={handleOnConfirm}
+            />
+        </>
     );
 }
 

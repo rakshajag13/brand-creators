@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   email: string;
-  role: "CLIENT" | "CREATOR";
+  role: "CLIENT" | "CREATOR" | "ADMIN";
 }
 export interface Contact {
   id: number;
@@ -9,7 +9,7 @@ export interface Contact {
   lastName: string;
   email: string;
   phone: string;
-  role: "CLIENT" | "CREATOR";
+  role: "CLIENT" | "CREATOR" | "ADMIN";
   status: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
   clientId: number;
   groups: [

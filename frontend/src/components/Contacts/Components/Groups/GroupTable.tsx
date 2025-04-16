@@ -53,7 +53,7 @@ export const GroupTable = ({
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {groups.map((group) => {
+                    {(Array.isArray(groups) ? groups : []).map((group) => {
                         const isSelected = selected.indexOf(group.id) !== -1;
                         return (
                             <TableRow

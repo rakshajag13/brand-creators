@@ -83,7 +83,7 @@ const AssignUsersToGroupModal: React.FC<AssignUsersToGroupModalProps> = ({ open,
                     fullWidth
                     className={classes.selectField}
                 >
-                    {groups.map((group) => (
+                    {Array.isArray(groups) && groups.map((group) => (
                         <MenuItem key={group.id} value={group.id}>
                             {group.name}
                         </MenuItem>
