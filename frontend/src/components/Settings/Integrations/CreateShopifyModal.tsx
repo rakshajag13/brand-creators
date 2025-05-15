@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { shopifySchema } from 'components/schemas/shopify.schema';
 import { ShopifyData } from 'types/shopify';
+import { requestHandler } from 'utils/requestHandler';
 
 interface CreateShopifyModalProps {
     open: boolean;
@@ -22,14 +23,7 @@ const CreateShoifyModal = ({ open, onClose }: CreateShopifyModalProps) => {
             storeName: data.storeName,
             storeUrl: data.storeShopifyUrl,
         };
-        const res = await fetch("http://localhost:4000/api/shops", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(input),
-        });
+        const res = await requestHandler("POST", "/api/shops", input);
         if (res.status === 201) {
             //onShopifyConnection({ storeName: data.storeName, status: "connected" });
             onClose();

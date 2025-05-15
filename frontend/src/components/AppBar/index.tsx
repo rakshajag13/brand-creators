@@ -11,7 +11,7 @@ import { DesktopIcons } from "./DesktopIcons";
 import { SearchBar } from "./SearchBar";
 
 export default function PrimarySearchAppBar() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -69,7 +69,7 @@ export default function PrimarySearchAppBar() {
             </Typography>
             <SearchBar />
             <Box sx={{ flexGrow: 1 }} />
-            <DesktopIcons handleProfileMenuOpen={handleProfileMenuOpen} />
+            <DesktopIcons handleProfileMenuOpen={handleProfileMenuOpen} userName={user?.firstName + " " + user?.lastName} />
             <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"

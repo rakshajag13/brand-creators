@@ -18,11 +18,20 @@ import { ForgotPassword } from "./ForgotPassword";
 import { ContactProvider } from "context/ContactContext";
 import { BrandSignup } from "./brandSignup";
 import { Settings } from "./Settings";
+import CreatorDashboard from "./Creators/CreatorDashboard";
 
 const App = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const userRole = user?.role;
+  const handleRedirect = React.useCallback(() => {
+    if (user?.role === "CREATOR") {
+      return navigate("/dashboard");
+    }
+    navigate("/contacts");
+  }, [navigate, user]);
+
 
   // Define route configurations
   const routes = {
@@ -53,7 +62,10 @@ const App = () => {
       },
 
     ],
-    protected: [
+    protected: userRole === "CREATOR" ? [{
+      path: "/dashboard",
+      element: <CreatorDashboard />
+    }] : [
       {
         path: "/contacts",
         element: (
@@ -69,16 +81,18 @@ const App = () => {
       {
         path: "/settings",
         element: <Settings />
-      }
+      },
+
     ],
   };
 
   useEffect(() => {
     const publicPaths = routes.public.map((route) => route.path);
     if (isLoggedIn() && publicPaths.includes(location.pathname)) {
-      navigate("/contacts");
+      handleRedirect();
+      //navigate("/contacts");
     }
-  }, [isLoggedIn, location.pathname, navigate, routes.public]);
+  }, [handleRedirect, isLoggedIn, location.pathname, navigate, routes.public]);
 
   return (
     <div>
@@ -90,7 +104,7 @@ const App = () => {
             key={path}
             path={path}
             element={
-              isLoggedIn() ? <Navigate to="/contacts" replace /> : element
+              isLoggedIn() ? <Navigate to={user?.role === "CREATOR" ? "/dashboard" : "/contacts"} replace /> : element
             }
           />
         ))}
@@ -109,7 +123,7 @@ const App = () => {
           path="*"
           element={
             isLoggedIn() ? (
-              <Navigate to="/contacts" replace />
+              <Navigate to={user?.role === "CREATOR" ? "/dashboard" : "/contacts"} replace />
             ) : (
               <Navigate to="/login" replace />
             )

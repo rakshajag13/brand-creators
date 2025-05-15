@@ -74,7 +74,7 @@ export const Register: React.FC = () => {
   const handleFormSubmit = async (data: RegisterData) => {
     try {
       await registerUser(data);
-      navigate("/Home");
+      navigate("/login");
     } catch (error) {
       console.error("Registration failed:", error);
     }

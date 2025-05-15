@@ -4,6 +4,8 @@ import { alpha } from "@mui/material/styles";
 import AssignUsersToGroupModal from "./AssignGroupToUsersModal";
 import React from "react";
 import { useContact } from "context/ContactContext";
+import { useAuth } from "context/AuthContext";
+import { User } from "types/auth";
 
 interface ContactsToolbarProps {
   userIds: number[];
@@ -12,6 +14,7 @@ interface ContactsToolbarProps {
   onDeleteContact?: () => void;
 }
 interface SelectedAction {
+  user: User | null;
   userIds: number[];
   handleOpenAssignGroupToUsersModal: () => void;
   onEditContact?: () => void;
@@ -19,6 +22,7 @@ interface SelectedAction {
 }
 
 const SelectedActions = ({
+  user,
   userIds,
   handleOpenAssignGroupToUsersModal,
   onDeleteContact,
@@ -30,11 +34,13 @@ const SelectedActions = ({
         <Group />
       </IconButton>
     </Tooltip>
-    <Tooltip title="Delete">
-      <IconButton onClick={onDeleteContact}>
-        <Delete />
-      </IconButton>
-    </Tooltip>
+    {!userIds.includes(Number(user?.id)) && (
+      <Tooltip title="Delete">
+        <IconButton onClick={onDeleteContact}>
+          <Delete />
+        </IconButton>
+      </Tooltip>
+    )}
     {userIds.length === 1 && (
       <Tooltip title="Edit">
         <IconButton onClick={onEditContact}>
@@ -77,10 +83,12 @@ export const ContactsToolbar = ({
   const [openAssignGroupToUsersModal, setOpenAssignGroupToUsersModal] =
     React.useState(false);
   const { getAllContacts, pagination } = useContact();
+  const { user } = useAuth();
 
   const handleOpenAssignGroupToUsersModal = () => {
     setOpenAssignGroupToUsersModal(true);
   };
+
 
 
   return (
@@ -100,6 +108,7 @@ export const ContactsToolbar = ({
       <ToolbarTitle userIds={userIds} />
       {userIds.length > 0 ? (
         <SelectedActions
+          user={user}
           userIds={userIds}
           handleOpenAssignGroupToUsersModal={handleOpenAssignGroupToUsersModal}
           onEditContact={onEditContact}

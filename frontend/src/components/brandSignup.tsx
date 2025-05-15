@@ -35,7 +35,7 @@ export const BrandSignup: React.FC = () => {
 
   const onSubmit = async (data: BrandSignupData) => {
     await signupUser(data);
-    navigate("/Home");
+    navigate("/login");
   };
 
   return (

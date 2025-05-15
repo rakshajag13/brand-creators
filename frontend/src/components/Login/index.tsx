@@ -21,15 +21,18 @@ export const Login: React.FC = () => {
     defaultValues: { email: "", password: "" },
   });
 
-  const { login: loginUser, isLoggedIn } = useAuth();
+  const { login: loginUser, isLoggedIn, user } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isLoggedIn()) {
+      if (user?.role === "CREATOR") {
+        return navigate("/dashboard");
+      }
       navigate("/contacts");
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, user, navigate]);
 
   const onSubmit = async (data: LoginData) => {
     try {
@@ -41,7 +44,7 @@ export const Login: React.FC = () => {
         return;
       }
 
-      navigate("/contacts");
+      //navigate("/contacts");
     } catch (error) {
       setErrorMessage("An unexpected error occurred. Please try again.");
     }

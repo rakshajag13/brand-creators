@@ -1,3 +1,4 @@
+import { hashPassword } from "../utils/password";
 import {
   Prisma,
   // PrismaClient,
@@ -86,7 +87,7 @@ async function createContact(data: ContactData): Promise<ContactResponse> {
       phone: data.phone,
       role: data.role,
       status: data.status || UserStatus.ACTIVE,
-      password: "",
+      password: await hashPassword(data.firstName + "@123"),
       resetToken: "",
     });
 

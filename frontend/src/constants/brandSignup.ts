@@ -3,6 +3,22 @@ export const DOMAINS = [
     domain: "abc.com",
     id: 1,
   },
+  {
+    domain: "abcd.com",
+    id: 2,
+  },
+  {
+    domain: "abcde.com",
+    id: 3,
+  },
+  {
+    domain: "test.com",
+    id: 4,
+  },
+  {
+    domain: "test1.com",
+    id: 5,
+  },
 ];
 
 export const FORM_FIELDS = [

@@ -66,16 +66,11 @@ export const ContactsTable = ({
                 tabIndex={-1}
                 key={contact.id}
                 selected={isSelected}
-                //gray out row contact.email === user?.email
-                style={{
-                  opacity: contact.email === user?.email ? 0.5 : 1,
-                }}
               >
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={isSelected}
                     onClick={() => onSelectClick(contact.id)}
-                    disabled={contact.email === user?.email}
                   />
                 </TableCell>
                 <StyledTableCell>{`${contact.firstName} ${contact.lastName}`}</StyledTableCell>

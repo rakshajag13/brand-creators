@@ -13,6 +13,7 @@ import ShopIcon from "@mui/icons-material/Shop";
 import CreateShopifyModal from "./CreateShopifyModal";
 import { ShopsToolbar } from "./ShopsToolbar";
 import "./Integrations.css"; // Import the CSS file
+import { requestHandler } from "utils/requestHandler";
 
 interface Shop {
     id: number;
@@ -41,16 +42,13 @@ const Integrations = () => {
         setIsConnected("Disconnected");
     };
     const getShops = async () => {
-        const res = await fetch(`http://localhost:4000/api/shops`, { credentials: "include" });
-        const data = await res.json();
-        setShops(data);
+        const res = await requestHandler<Shop[]>("GET", "/api/shops");
+        const data = res.data;
+        setShops(data || []);
     };
 
     const deleteShopById = async (shopId: number) => {
-        await fetch(`http://localhost:4000/api/shops/${shopId}`, {
-            method: "DELETE",
-            credentials: "include",
-        });
+        await requestHandler("DELETE", `/api/shops/${shopId}`);
         getShops();
     };
     const setShopStatus = React.useCallback(() => {

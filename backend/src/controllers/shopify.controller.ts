@@ -22,7 +22,7 @@ export const createShopifyStore = async (
       clientId: clientId,
     });
     await shopService.createShopifyStore(data);
-    res.status(201).send("shop created successfully");
+    res.status(201).send({ message: "shop created successfully" });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });

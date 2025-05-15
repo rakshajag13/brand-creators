@@ -22,7 +22,7 @@ export const BrandSignupDTO = z.object({
   password: passwordSchema,
   companyName: z.string().min(1),
   industry: z.string().min(1),
-  website: z.string().url(),
+  website: z.string(),
   businessType: z.string().min(1),
   phone: phoneSchema,
   domain: z.string().min(1),
